@@ -69,7 +69,12 @@ macro(add_example_executable name)
 
     find_package(imgui REQUIRED)
     find_package(imgui_node_editor REQUIRED)
-    target_link_libraries(${name} PRIVATE imgui imgui_node_editor application)
+
+	if (${name} STREQUAL QuantLabStudio)
+        target_link_libraries(${name} PRIVATE imgui imgui_node_editor QuantLabStudioApplication)
+	else()
+        target_link_libraries(${name} PRIVATE imgui imgui_node_editor application)
+	endif()
 
     set(_ExampleBinDir ${CMAKE_BINARY_DIR}/bin)
 
@@ -120,7 +125,7 @@ macro(add_example_executable name)
 endmacro()
 
 add_subdirectory(application)
-
+add_subdirectory(QuantLabStudioApplication)
 add_subdirectory(canvas-example)
 add_subdirectory(simple-example)
 add_subdirectory(basic-interaction-example)

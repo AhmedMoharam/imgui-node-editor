@@ -486,7 +486,26 @@ void BuildNodes()
 
 const char* Application_GetName()
 {
-    return "Blueprints";
+    return "QuantLabStudio";
+}
+
+void Style_Setup() {
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.Colors[ImGuiCol_WindowBg] = ImVec4(0.3f, 0.3f, 0.3f, 0.9f);
+	style.Colors[ImGuiCol_Tab] = ImVec4(0.1f, 0.1f, 0.1f, 0.9f);
+	style.Colors[ImGuiCol_TabHovered] = ImVec4(0.7f, 0.7f, 0.7f, 0.9f);
+	style.Colors[ImGuiCol_TabActive] = ImVec4(0.5f, 0.5f, 0.5f, 0.9f);
+	style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.2f, 0.2f, 0.2f, 0.9f);
+	style.Colors[ImGuiCol_TitleBg] = style.Colors[ImGuiCol_WindowBg];
+	style.Colors[ImGuiCol_TabUnfocusedActive] = style.Colors[ImGuiCol_Tab];
+	style.Colors[ImGuiCol_TabUnfocused] = style.Colors[ImGuiCol_Tab];
+	style.Colors[ImGuiCol_Button] = style.Colors[ImGuiCol_Tab];
+	style.Colors[ImGuiCol_HeaderActive] = style.Colors[ImGuiCol_Tab];
+	style.Colors[ImGuiCol_Header] = style.Colors[ImGuiCol_Tab];
+	style.Colors[ImGuiCol_HeaderHovered] = style.Colors[ImGuiCol_TabHovered];
+
+	style.TabRounding = 0;
+	style.FramePadding.x = 20;
 }
 
 void Application_Initialize()
@@ -559,6 +578,8 @@ void Application_Initialize()
     s_HeaderBackground = Application_LoadTexture("Data/BlueprintBackground.png");
     s_SaveIcon         = Application_LoadTexture("Data/ic_save_white_24dp.png");
     s_RestoreIcon      = Application_LoadTexture("Data/ic_restore_white_24dp.png");
+
+	Style_Setup();
 }
 
 void Application_Finalize()
@@ -707,7 +728,7 @@ void ShowStyleEditor(bool* show = nullptr)
     ImGui::End();
 }
 
-void ShowLeftPane(float paneWidth)
+void ShowPropertiesPane(float paneWidth)
 {
     auto& io = ImGui::GetIO();
 
@@ -903,11 +924,10 @@ void NodeEditorViewport() {
 	static Pin* newLinkPin = nullptr;
 
 	static float leftPaneWidth = 400.0f;
-	static float rightPaneWidth = 800.0f;
-	//Splitter(true, 4.0f, &leftPaneWidth, &rightPaneWidth, 50.0f, 50.0f);
 
-	ImGui::Begin("LeftPaneView");
-		ShowLeftPane(leftPaneWidth - 4.0f);
+
+	ImGui::Begin("NodeEditiorProperties");
+		ShowPropertiesPane(leftPaneWidth - 4.0f);
 	ImGui::End();
 
 	ImGui::Begin("NodeEditorView");
@@ -1740,8 +1760,6 @@ void Application_Frame()
 
     auto& io = ImGui::GetIO();
 
-    //ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
-	//ImGui::Separator();
 	NodeEditorViewport();
 }
 
