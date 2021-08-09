@@ -209,7 +209,7 @@ void AppDockSpace()
 	// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
 	// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-	ImGui::Begin("DockSpace Demo", nullptr, window_flags);
+	ImGui::Begin("DockSpace View", nullptr, window_flags);
 	ImGui::PopStyleVar();
 
 	if (opt_fullscreen)
@@ -231,8 +231,10 @@ void AppDockSpace()
 	ImGui::End();
 }
 
-int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
+//int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
+int main()
 {
+
     const auto c_ClassName  = _T("Node Editor Class");
 # if defined(_UNICODE)
     const std::wstring c_WindowName = widen(Application_GetName());

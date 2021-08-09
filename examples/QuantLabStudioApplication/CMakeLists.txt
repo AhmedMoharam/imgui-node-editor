@@ -2,6 +2,7 @@ project(QuantLabStudioApplication)
 
 set(_Application_Sources
     include/application.h
+	source/python/python_impl.cpp
 )
 
 if (WIN32)
@@ -39,6 +40,7 @@ target_link_libraries(QuantLabStudioApplication PRIVATE stb_image ScopeGuard)
 if (WIN32)
     set(_DXSDK_Dir  ${IMGUI_NODE_EDITOR_ROOT_DIR}/external/DXSDK)
     set(_DXSDK_Arch x86)
+	set(_Py_Dir ${IMGUI_NODE_EDITOR_ROOT_DIR}/external/python)
     if (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
         set(_DXSDK_Arch x64)
     endif()
@@ -54,8 +56,21 @@ if (WIN32)
         INTERFACE_INCLUDE_DIRECTORIES   "${_DXSDK_Dir}/include"
         INTERFACE_LINK_LIBRARIES        "$<$<CONFIG:Debug>:dxerr2>"
     )
+	
+	add_library(python37 UNKNOWN IMPORTED)
+    set_target_properties(python37 PROPERTIES
+        IMPORTED_LOCATION               "${_Py_Dir}/lib/python37.lib"
+        INTERFACE_INCLUDE_DIRECTORIES   "${_Py_Dir}/include"
+    )
+	
+	add_library(boost_python37 UNKNOWN IMPORTED)
+    set_target_properties(boost_python37 PROPERTIES
+        IMPORTED_LOCATION               "${_Py_Dir}/lib/boost_python37-vc141-mt-x64-1_76.lib"
+		IMPORTED_LOCATION_DEBUG         "${_Py_Dir}/lib/boost_python37-vc141-mt-gd-x64-1_76.lib"
+        INTERFACE_INCLUDE_DIRECTORIES   "${_Py_Dir}/include"
+    )
 
-    target_link_libraries(QuantLabStudioApplication PRIVATE d3d11.lib d3dcompiler.lib d3dx11)
+    target_link_libraries(QuantLabStudioApplication PRIVATE d3d11.lib d3dcompiler.lib d3dx11 python37 boost_python37)
 else()
     target_include_directories(QuantLabStudioApplication PRIVATE ${OPENGL_INCLUDE_DIR})
 
@@ -72,5 +87,7 @@ else()
         )
     endif()
 endif()
+
+
 
 set_property(TARGET QuantLabStudioApplication PROPERTY FOLDER "examples")

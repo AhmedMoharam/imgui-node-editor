@@ -12,6 +12,7 @@
 #include <map>
 #include <algorithm>
 #include <utility>
+#include <iostream>
 
 
 static inline ImRect ImGui_GetItemRect()
@@ -105,6 +106,7 @@ struct Node
 
     std::string State;
     std::string SavedState;
+	std::string data;
 
     Node(int id, const char* name, ImColor color = ImColor(255, 255, 255)):
         ID(id), Name(name), Color(color), Type(NodeType::Blueprint), Size(0, 0)
@@ -273,6 +275,62 @@ static void BuildNode(Node* node)
         output.Node = node;
         output.Kind = PinKind::Output;
     }
+}
+
+
+static Node* SpawnRSI()
+{
+	s_Nodes.emplace_back(GetNextId(), "RSI", ImColor(255, 128, 128));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Bool);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Stock:", PinType::String);
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+static Node* SpawnMACD()
+{
+	s_Nodes.emplace_back(GetNextId(), "MACD", ImColor(255, 128, 128));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Bool);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Stock:", PinType::String);
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+static Node* SpawnIchimokuCloud()
+{
+	s_Nodes.emplace_back(GetNextId(), "IchimokuCloud", ImColor(255, 128, 128));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Bool);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Stock:", PinType::String);
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+static Node* SpawnOBV()
+{
+	s_Nodes.emplace_back(GetNextId(), "OBV", ImColor(255, 128, 128));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Bool);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Stock:", PinType::String);
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+static Node* SpawnWILLIAMS()
+{
+	s_Nodes.emplace_back(GetNextId(), "WILLIAMS", ImColor(255, 128, 128));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Bool);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Stock:", PinType::String);
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
 }
 
 static Node* SpawnInputActionNode()
@@ -478,6 +536,7 @@ static Node* SpawnHoudiniGroupNode()
     return &s_Nodes.back();
 }
 
+
 void BuildNodes()
 {
     for (auto& node : s_Nodes)
@@ -545,7 +604,15 @@ void Application_Initialize()
     ed::SetCurrentEditor(m_Editor);
 
     Node* node;
+
+	node = SpawnRSI();      ed::SetNodePosition(node->ID, ImVec2(0, 0));
+/*	node = SpawnMACD();      ed::SetNodePosition(node->ID, ImVec2(0, 0));
+	node = SpawnOBV();      ed::SetNodePosition(node->ID, ImVec2(0, 0));
+	node = SpawnWILLIAMS();      ed::SetNodePosition(node->ID, ImVec2(0, 0));
+	node = SpawnIchimokuCloud();      ed::SetNodePosition(node->ID, ImVec2(0, 0));
+	*/
     node = SpawnInputActionNode();      ed::SetNodePosition(node->ID, ImVec2(-252, 220));
+	
     node = SpawnBranchNode();           ed::SetNodePosition(node->ID, ImVec2(-300, 351));
     node = SpawnDoNNode();              ed::SetNodePosition(node->ID, ImVec2(-238, 504));
     node = SpawnOutputActionNode();     ed::SetNodePosition(node->ID, ImVec2(71, 80));
@@ -656,7 +723,7 @@ void DrawPinIcon(const Pin& pin, bool connected, int alpha)
 
 void ShowStyleEditor(bool* show = nullptr)
 {
-    if (!ImGui::Begin("Style", show))
+    if (!ImGui::Begin("Style", show, ImGuiWindowFlags_NoMove))
     {
         ImGui::End();
         return;
@@ -926,11 +993,11 @@ void NodeEditorViewport() {
 	static float leftPaneWidth = 400.0f;
 
 
-	ImGui::Begin("NodeEditiorProperties");
+	ImGui::Begin("NodeEditiorProperties", 0, ImGuiWindowFlags_NoMove);
 		ShowPropertiesPane(leftPaneWidth - 4.0f);
 	ImGui::End();
 
-	ImGui::Begin("NodeEditorView");
+	ImGui::Begin("NodeEditorView", 0 , ImGuiWindowFlags_NoMove);
 	//ImGui::SameLine(0.0f, 12.0f);
 
 	ed::Begin("Node editor");
@@ -1016,7 +1083,31 @@ void NodeEditorViewport() {
 				}
 				if (input.Type == PinType::Bool)
 				{
-					ImGui::Button("Hello");
+					if (ImGui::Button("RUN ME")) {
+						if (input.Node->Name == "RSI") {
+							std::cout << "RUN RST with " << input.Node->data << std::endl;
+							std::cout << "result =" << py::RSI(input.Node->data.c_str()) << std::endl;
+						}
+						else if (input.Node->Name == "OBV") {
+							std::cout << "RUN OBV with " << input.Node->data << std::endl;
+							std::cout << "result =" << py::OBV(input.Node->data.c_str()) << std::endl;
+						}
+						else if (input.Node->Name == "MACD") {
+							std::cout << "RUN MCAD with " << input.Node->data << std::endl;
+							std::cout << "result =" << py::MACD(input.Node->data.c_str()) << std::endl;
+
+						}
+						else if (input.Node->Name == "WILLIAMS") {
+							std::cout << "RUN WILLIAMS with " << input.Node->data << std::endl;
+							std::cout << "result =" << py::WILLIAMS(input.Node->data.c_str()) << std::endl;
+
+						}
+						else if (input.Node->Name == "IchimokuCloud") {
+							std::cout << "RUN IchimokuCloud with " << input.Node->data << std::endl;
+							std::cout << "result =" << py::IchimokuCloud(input.Node->data.c_str()) << std::endl;
+
+						}
+					}
 					ImGui::Spring(0);
 				}
 				ImGui::PopStyleVar();
@@ -1049,7 +1140,9 @@ void NodeEditorViewport() {
 					static bool wasActive = false;
 
 					ImGui::PushItemWidth(100.0f);
-					ImGui::InputText("##edit", buffer, 127);
+					if (ImGui::InputText("##edit", buffer, 127)) {
+						output.Node->data = buffer;
+					}
 					ImGui::PopItemWidth();
 					if (ImGui::IsItemActive() && !wasActive)
 					{
@@ -1076,6 +1169,7 @@ void NodeEditorViewport() {
 
 			builder.End();
 		}
+
 
 		for (auto& node : s_Nodes)
 		{
@@ -1644,6 +1738,18 @@ void NodeEditorViewport() {
 		//drawList->AddCircleFilled(ImGui::GetMousePosOnOpeningCurrentPopup(), 10.0f, 0xFFFF00FF);
 
 		Node* node = nullptr;
+		if (ImGui::MenuItem("RSI"))
+			node = SpawnRSI();
+		if (ImGui::MenuItem("MACD"))
+			node = SpawnMACD();
+		if (ImGui::MenuItem("OBV"))
+			node = SpawnOBV();
+		if (ImGui::MenuItem("WILLIWAMS"))
+			node = SpawnWILLIAMS();
+		if (ImGui::MenuItem("IchimokuCloud"))
+			node = SpawnIchimokuCloud();
+		ImGui::Separator();
+
 		if (ImGui::MenuItem("Input Action"))
 			node = SpawnInputActionNode();
 		if (ImGui::MenuItem("Output Action"))
@@ -1680,6 +1786,7 @@ void NodeEditorViewport() {
 			node = SpawnHoudiniTransformNode();
 		if (ImGui::MenuItem("Group"))
 			node = SpawnHoudiniGroupNode();
+			
 
 		if (node)
 		{
@@ -1749,17 +1856,59 @@ void NodeEditorViewport() {
 	ImGui::End();
 }
 
+void library_pane() {
 
+	ImGui::Begin("Library", 0, ImGuiWindowFlags_NoMove);
+	if (ImGui::CollapsingHeader("Indicators"))
+	{
+		if (ImGui::Selectable("RSI") ){
+
+		} 
+		if (ImGui::Selectable("MACD")) {
+
+		}
+		if (ImGui::Selectable("OBV")) {
+
+		}
+		if (ImGui::Selectable("WILLIAMS")) {
+
+		}
+		if (ImGui::Selectable("IchimokuCloud")) {
+
+		}
+
+	}
+
+	if (ImGui::CollapsingHeader("Math Utils"))
+	{
+		if (ImGui::Selectable("ADD")) {
+
+		}
+		if (ImGui::Selectable("SUBTRACT")) {
+
+		}
+		if (ImGui::Selectable("MULTIPLY")) {
+
+		}
+		if (ImGui::Selectable("DEVIDE")) {
+
+		}
+
+	}
+
+	ImGui::End();
+}
 
 void Application_Frame()
 {
 
-	ImGui::ShowDemoWindow();
+	//ImGui::ShowDemoWindow();
+	
 
     UpdateTouch();
 
     auto& io = ImGui::GetIO();
-
+	library_pane();
 	NodeEditorViewport();
 }
 

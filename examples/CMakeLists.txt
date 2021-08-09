@@ -124,6 +124,16 @@ macro(add_example_executable name)
 
 endmacro()
 
+# Copy files from source directory to destination directory, at generation
+# Create destination directory if it does not exist.
+
+macro(copy_dir srcDir destDir)
+    message(STATUS "Copying directory ${srcDir} to ${destDir}")
+    make_directory(${destDir})
+	file(COPY ${srcDir} DESTINATION ${destDir})
+endmacro(copy_dir)
+
+
 add_subdirectory(application)
 add_subdirectory(QuantLabStudioApplication)
 add_subdirectory(canvas-example)
@@ -131,3 +141,5 @@ add_subdirectory(simple-example)
 add_subdirectory(basic-interaction-example)
 add_subdirectory(blueprints-example)
 add_subdirectory(QuantLabStudio)
+
+copy_dir(${IMGUI_NODE_EDITOR_ROOT_DIR}/external/python/python-venv ${CMAKE_BINARY_DIR}/bin)
