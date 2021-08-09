@@ -9,4 +9,4 @@ bin
 *.user
 *.ini
 *.json
-*boost*
+external/boost*
