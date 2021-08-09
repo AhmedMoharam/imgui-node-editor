@@ -1,4 +1,52 @@
 #pragma once
+#include <iostream>
+#define EXEC_NODE_NAME "Exec"
+
+static Node* SpawnExec()
+{
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, EXEC_NODE_NAME , ImColor(255, 255, 255));
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+
+	s_Nodes.back().setExec([]() -> void {std::cout << "Hello from inside exec" << std::endl; });
+	BuildNode(&s_Nodes.back());
+	return &s_Nodes.back();
+}
+
+static Node* SpawnNodeA()
+{
+	s_Nodes.emplace_back(GetNextId(), "Node A", ImColor(255, 128, 128));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+
+	s_Nodes.back().setExec([]() -> void {std::cout << "Hello from inside Node A" << std::endl; });
+	BuildNode(&s_Nodes.back());
+	return &s_Nodes.back();
+}
+
+static Node* SpawnNodeB()
+{
+	s_Nodes.emplace_back(GetNextId(), "Node B", ImColor(255, 0, 128));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+
+	s_Nodes.back().setExec([]() -> void {std::cout << "Hello from inside Node B" << std::endl; });
+	BuildNode(&s_Nodes.back());
+	return &s_Nodes.back();
+}
+
+static Node* SpawnSequence()
+{
+	s_Nodes.emplace_back(GetNextId(), "Sequence", ImColor(255, 225, 225));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+
+	s_Nodes.back().setExec([]() -> void {std::cout << "Hello from inside Sequence" << std::endl; });
+	BuildNode(&s_Nodes.back());
+	return &s_Nodes.back();
+}
 
 static Node* SpawnRSI()
 {

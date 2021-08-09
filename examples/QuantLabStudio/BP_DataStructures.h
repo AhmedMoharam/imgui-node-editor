@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <functional>
 using namespace ax;
 namespace ed = ax::NodeEditor;
 
@@ -68,6 +69,20 @@ struct Node
 		ID(id), Name(name), Color(color), Type(NodeType::Blueprint), Size(0, 0)
 	{
 	}
+
+	void setExec(std::function<void()> f)
+	{
+		m_exec_func = f;
+	}
+
+	void exec()
+	{
+		if (m_exec_func)
+			m_exec_func();
+	}
+
+	std::function<void()> m_exec_func;
+
 };
 
 struct Link
@@ -115,6 +130,7 @@ static const float          s_TouchTime = 1.0f;
 static std::map<ed::NodeId, float, NodeIdLess> s_NodeTouchTime;
 
 static int s_NextId = 1;
+static std::map<int, int>	s_ExecNodes_indecies;
 
 
 
@@ -202,6 +218,24 @@ static bool IsPinLinked(ed::PinId id)
 			return true;
 
 	return false;
+}
+
+static Pin* FindLinkedPin(ed::PinId id)
+{
+	if (!id)
+		return nullptr;
+
+	for (auto& link : s_Links)
+		if (link.StartPinID == id)
+		{
+			return FindPin(link.EndPinID);
+		}
+		else if (link.EndPinID == id)
+		{
+			return FindPin(link.StartPinID);
+		}
+
+	return nullptr;
 }
 
 static bool CanCreateLink(Pin* a, Pin* b)

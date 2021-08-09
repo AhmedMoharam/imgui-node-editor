@@ -6,11 +6,54 @@
 #include <imgui_internal.h>
 #include "BP_DataStructures.h"
 #include "BP_NodesLibrary.h"
-
 #include <algorithm>
+
 #include <utility>
 #include <iostream>
+#include <thread>
 
+static bool thread_run_once = false;
+static bool thread_close = false;
+
+//DFS using recursion
+static void execute_nodes(Node * node) {
+	if (!node)
+		return;
+
+	node->exec();
+
+	for (auto & outpin : node->Outputs)
+	{
+		if (outpin.Type == PinType::Flow)
+		{
+			Pin* connected_pin = FindLinkedPin(outpin.ID);
+			if (connected_pin)
+			{
+				execute_nodes(connected_pin->Node);
+			}
+		}
+
+	}
+}
+
+static void Execution_Thread()
+{
+	while (!thread_close)
+	{
+		if (thread_run_once)
+		{
+			for (auto& node : s_Nodes)
+			{
+				if (node.Name == EXEC_NODE_NAME)
+				{
+					execute_nodes(&node);
+				}
+			}
+			thread_run_once = false;
+		}
+	}
+}
+static std::thread executionThread;
 
 
 static inline ImRect ImGui_GetItemRect()
@@ -94,7 +137,8 @@ void Application_Initialize()
 
     Node* node;
 
-	node = SpawnRSI();      ed::SetNodePosition(node->ID, ImVec2(0, 0));
+	node = SpawnExec();		ed::SetNodePosition(node->ID, ImVec2(0, 0));
+	//node = SpawnRSI();      ed::SetNodePosition(node->ID, ImVec2(0, 0));
 	node = SpawnMACD();      ed::SetNodePosition(node->ID, ImVec2(0, 150));
 	node = SpawnOBV();      ed::SetNodePosition(node->ID, ImVec2(0, 300));
 	node = SpawnWILLIAMS();      ed::SetNodePosition(node->ID, ImVec2(0, 450));
@@ -112,6 +156,7 @@ void Application_Initialize()
     s_RestoreIcon      = Application_LoadTexture("Data/ic_restore_white_24dp.png");
 
 	Style_Setup();
+	executionThread = std::thread(Execution_Thread);
 }
 
 void Application_Finalize()
@@ -134,6 +179,8 @@ void Application_Finalize()
         ed::DestroyEditor(m_Editor);
         m_Editor = nullptr;
     }
+	if (executionThread.joinable())
+		executionThread.join();
 }
 
 
@@ -1047,8 +1094,10 @@ void NodeEditorViewport() {
 					if (ed::AcceptDeletedItem())
 					{
 						auto id = std::find_if(s_Nodes.begin(), s_Nodes.end(), [nodeId](auto& node) { return node.ID == nodeId; });
-						if (id != s_Nodes.end())
+						if (id != s_Nodes.end()) {					
 							s_Nodes.erase(id);
+						}
+							
 					}
 				}
 			}
@@ -1153,7 +1202,15 @@ void NodeEditorViewport() {
 		if (ImGui::MenuItem("IchimokuCloud"))
 			node = SpawnIchimokuCloud();
 		ImGui::Separator();
-
+		if (ImGui::MenuItem("Exec"))
+			node = SpawnExec();
+		if (ImGui::MenuItem("Node A"))
+			node = SpawnNodeA();
+		if (ImGui::MenuItem("Node B"))
+			node = SpawnNodeB();
+		if (ImGui::MenuItem("Sequence"))
+			node = SpawnSequence();
+		ImGui::Separator();
 		/*if (ImGui::MenuItem("Input Action"))
 			node = SpawnInputActionNode();
 		if (ImGui::MenuItem("Output Action"))
@@ -1275,6 +1332,12 @@ void library_pane() {
 		}
 
 	}
+
+	if (ImGui::Button("Run"))
+	{
+		thread_run_once = true;
+	}
+
 
 	ImGui::End();
 }
