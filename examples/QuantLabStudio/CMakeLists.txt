@@ -1,5 +1,7 @@
 add_example_executable(QuantLabStudio
     blueprints-system.cpp
+	BP_DataStructures.h
+	BP_NodesLibrary.h
     utilities/builders.h
     utilities/drawing.h
     utilities/widgets.h
