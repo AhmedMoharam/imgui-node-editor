@@ -9,7 +9,6 @@
 #include <algorithm>
 
 #include <utility>
-#include <iostream>
 #include <thread>
 
 static bool thread_run_once = false;
@@ -637,7 +636,7 @@ void NodeEditorViewport() {
 				builder.Output(output.ID);
 				if (output.Type == PinType::String)
 				{
-					static char buffer[128] = "Edit Me\nMultiline!";
+					static char buffer[128] = "Edit Me";
 					static bool wasActive = false;
 
 					ImGui::PushItemWidth(100.0f);
@@ -1210,6 +1209,8 @@ void NodeEditorViewport() {
 			node = SpawnNodeB();
 		if (ImGui::MenuItem("Sequence"))
 			node = SpawnSequence();
+		if (ImGui::MenuItem("Input"))
+			node = SpawnInputNode();
 		ImGui::Separator();
 		/*if (ImGui::MenuItem("Input Action"))
 			node = SpawnInputActionNode();

@@ -48,11 +48,31 @@ static Node* SpawnSequence()
 	return &s_Nodes.back();
 }
 
+static Node* SpawnInputNode()
+{
+	s_Nodes.emplace_back(GetNextId(), "", ImColor(128, 195, 248));
+	s_Nodes.back().Type = NodeType::Simple;
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Input", PinType::String);
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
 static Node* SpawnRSI()
 {
-	s_Nodes.emplace_back(GetNextId(), "RSI", ImColor(255, 128, 128));
-	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Bool);
-	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Stock:", PinType::String);
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "RSI", ImColor(255, 128, 128));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Stock Name", PinType::String);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Result", PinType::Float);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			float result = py::RSI(get_string_input(node_id, 1));
+			std::cout << "RSI " << result << std::endl;
+			set_float_output(node_id, 1, result);
+		});
 
 	BuildNode(&s_Nodes.back());
 

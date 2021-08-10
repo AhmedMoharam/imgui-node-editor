@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <iostream>
 #include <functional>
 using namespace ax;
 namespace ed = ax::NodeEditor;
@@ -49,6 +50,10 @@ struct Pin
 		ID(id), Node(nullptr), Name(name), Type(type), Kind(PinKind::Input)
 	{
 	}
+
+
+	float float_data;
+	std::string sting_data;
 };
 
 struct Node
@@ -268,3 +273,48 @@ void BuildNodes()
 	for (auto& node : s_Nodes)
 		BuildNode(&node);
 }
+
+///////////////////////
+
+//helper for get_string_input
+char * evaluate_node_and_get_string(ed::NodeId id, int output_pin_index)
+{
+	return nullptr;
+}
+
+const char * get_string_input(ed::NodeId id, int input_pin_index)
+{
+	Node * node = FindNode(id);
+	Pin * pin = &(node->Inputs[input_pin_index]);
+	if (pin->Type == PinType::String)
+	{
+		std::cout << "CAPTCHA!" << std::endl;
+		return "MSFT";
+		//TO DO 
+		// if linked with pin is input node (to do implement input node type) -> get value
+		// if not evaluate node and get output at pin id
+	}
+	return nullptr;
+}
+
+//helper for get_float_input
+float evaluate_node_and_get_float(ed::NodeId id, int output_pin_index)
+{
+	return 0.0f;
+}
+
+float get_float_input(ed::NodeId id, int input_pin_index)
+{
+	return 0.0f;
+}
+
+void set_float_output(ed::NodeId id, int output_pin_index, float result)
+{
+
+}
+
+void set_string_output(ed::NodeId id, int output_pin_index, char * result)
+{
+
+}
+
