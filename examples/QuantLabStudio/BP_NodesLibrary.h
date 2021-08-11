@@ -2,6 +2,10 @@
 #include <iostream>
 #define EXEC_NODE_NAME "Exec"
 
+
+
+
+
 static Node* SpawnExec()
 {
 	int node_id = GetNextId();
@@ -34,7 +38,7 @@ static Node* SpawnNodeB()
 	BuildNode(&s_Nodes.back());
 	return &s_Nodes.back();
 }
-
+// Utils ---------------------------------------------------------------------
 static Node* SpawnSequence()
 {
 	s_Nodes.emplace_back(GetNextId(), "Sequence", ImColor(255, 225, 225));
@@ -48,17 +52,140 @@ static Node* SpawnSequence()
 	return &s_Nodes.back();
 }
 
-static Node* SpawnInputNode()
+static Node* SpawnADD()
 {
-	s_Nodes.emplace_back(GetNextId(), "", ImColor(128, 195, 248));
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "+", ImColor(128, 195, 248));
 	s_Nodes.back().Type = NodeType::Simple;
-	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Input", PinType::String);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			float input1 = get_float_input(node_id, 0);
+			float input2 = get_float_input(node_id, 1);
+			float result = input1 + input2;
+			std::cout << "ADD " << input1 << "+" << input2 << "=" << result << std::endl;
+			set_float_output(node_id, 0, result);
+		});
 
 	BuildNode(&s_Nodes.back());
 
 	return &s_Nodes.back();
 }
 
+static Node* SpawnSubtract()
+{
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "-", ImColor(128, 195, 248));
+	s_Nodes.back().Type = NodeType::Simple;
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			float input1 = get_float_input(node_id, 0);
+			float input2 = get_float_input(node_id, 1);
+			float result = input1 - input2;
+			std::cout << "Subtract " << input1 << "-" << input2 << "=" << result << std::endl;
+			set_float_output(node_id, 0, result);
+		});
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+static Node* SpawnMultiply()
+{
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "x", ImColor(128, 195, 248));
+	s_Nodes.back().Type = NodeType::Simple;
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			float input1 = get_float_input(node_id, 0);
+			float input2 = get_float_input(node_id, 1);
+			float result = input1 * input2;
+			std::cout << "Mul " << input1 << "x" << input2 << "=" << result << std::endl;
+			set_float_output(node_id, 0, result);
+		});
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+static Node* SpawnDivide()
+{
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "/", ImColor(128, 195, 248));
+	s_Nodes.back().Type = NodeType::Simple;
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			float input1 = get_float_input(node_id, 0);
+			float input2 = get_float_input(node_id, 1);
+			float result = input1 / input2;
+			std::cout << "Div " << input1 << "/" << input2 << "=" << result << std::endl;
+			set_float_output(node_id, 0, result);
+		});
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+// Print ---------------------------------------------------------------------
+
+static Node* SpawnPrintFloat()
+{
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "Print", ImColor(75, 0, 130));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "float", PinType::Float);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			float result = get_float_input(node_id, 1);
+			std::cout << "Print Float: " << result << std::endl;
+		});
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+// Inputs ---------------------------------------------------------------------
+static Node* SpawnStringInputNode()
+{
+	s_Nodes.emplace_back(GetNextId(), "", ImColor(128, 195, 248));
+	s_Nodes.back().Type = NodeType::Simple;
+	s_Nodes.back().isInputNode = true;
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "String", PinType::String);
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+static Node* SpawnFloatInputNode()
+{
+	s_Nodes.emplace_back(GetNextId(), "", ImColor(128, 195, 248));
+	s_Nodes.back().Type = NodeType::Simple;
+	s_Nodes.back().isInputNode = true;
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Float", PinType::Float);
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+// Trading ---------------------------------------------------------------------
 static Node* SpawnRSI()
 {
 	int node_id = GetNextId();

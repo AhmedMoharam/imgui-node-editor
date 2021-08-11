@@ -49,6 +49,7 @@ struct Pin
 	Pin(int id, const char* name, PinType type) :
 		ID(id), Node(nullptr), Name(name), Type(type), Kind(PinKind::Input)
 	{
+		float_data = 0.0f;
 	}
 
 
@@ -68,10 +69,9 @@ struct Node
 
 	std::string State;
 	std::string SavedState;
-	std::string data;
 
 	Node(int id, const char* name, ImColor color = ImColor(255, 255, 255)) :
-		ID(id), Name(name), Color(color), Type(NodeType::Blueprint), Size(0, 0)
+		ID(id), Name(name), Color(color), Type(NodeType::Blueprint), Size(0, 0), isInputNode(false)
 	{
 	}
 
@@ -87,6 +87,7 @@ struct Node
 	}
 
 	std::function<void()> m_exec_func;
+	bool isInputNode;
 
 };
 
@@ -277,7 +278,7 @@ void BuildNodes()
 ///////////////////////
 
 //helper for get_string_input
-char * evaluate_node_and_get_string(ed::NodeId id, int output_pin_index)
+const char * evaluate_node_and_get_string(ed::NodeId id, ax::NodeEditor::PinId output_pin_id)
 {
 	return nullptr;
 }
@@ -288,28 +289,77 @@ const char * get_string_input(ed::NodeId id, int input_pin_index)
 	Pin * pin = &(node->Inputs[input_pin_index]);
 	if (pin->Type == PinType::String)
 	{
-		std::cout << "CAPTCHA!" << std::endl;
-		return "MSFT";
-		//TO DO 
 		// if linked with pin is input node (to do implement input node type) -> get value
 		// if not evaluate node and get output at pin id
+		Pin * connected_pin = FindLinkedPin(pin->ID);
+		if (connected_pin)
+		{
+			Node * node = connected_pin->Node;
+			if (node->isInputNode)
+			{
+				return connected_pin->sting_data.c_str();
+			}
+			else
+			{
+				return evaluate_node_and_get_string(node->ID, connected_pin->ID);
+			}
+		}
+		else
+		{
+			// not connected to any node
+			throw;
+		}		
 	}
 	return nullptr;
 }
 
 //helper for get_float_input
-float evaluate_node_and_get_float(ed::NodeId id, int output_pin_index)
+float evaluate_node_and_get_float(Node * node, Pin * output_pin)
 {
-	return 0.0f;
+	node->exec();
+	return output_pin->float_data;
 }
 
 float get_float_input(ed::NodeId id, int input_pin_index)
 {
+	Node * node = FindNode(id);
+	Pin * pin = &(node->Inputs[input_pin_index]);
+	if (pin->Type == PinType::Float)
+	{
+		// if linked with pin is input node (to do implement input node type) -> get value
+		// if not evaluate node and get output at pin id
+		Pin * connected_pin = FindLinkedPin(pin->ID);
+		if (connected_pin)
+		{
+			Node * node = connected_pin->Node;
+			if (node->Type == NodeType::Simple)
+			{
+				return evaluate_node_and_get_float(node, connected_pin);
+			}
+			else
+			{
+				return connected_pin->float_data;
+			}
+		}
+		else
+		{
+			// not connected to any node
+			throw;
+		}
+	}
+	else {
+		// wrong exec function 
+		std::cout << "wrong exec function " << std::endl;
+		throw;
+	}
 	return 0.0f;
 }
 
 void set_float_output(ed::NodeId id, int output_pin_index, float result)
 {
+	Node * node = FindNode(id);
+	Pin * pin = &(node->Outputs[output_pin_index]);
+	pin->float_data = result;
 
 }
 

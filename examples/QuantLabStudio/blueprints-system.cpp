@@ -11,8 +11,6 @@
 #include <utility>
 #include <thread>
 
-static bool thread_run_once = false;
-static bool thread_close = false;
 
 //DFS using recursion
 static void execute_nodes(Node * node) {
@@ -37,18 +35,11 @@ static void execute_nodes(Node * node) {
 
 static void Execution_Thread()
 {
-	while (!thread_close)
+	for (auto& node : s_Nodes)
 	{
-		if (thread_run_once)
+		if (node.Name == EXEC_NODE_NAME)
 		{
-			for (auto& node : s_Nodes)
-			{
-				if (node.Name == EXEC_NODE_NAME)
-				{
-					execute_nodes(&node);
-				}
-			}
-			thread_run_once = false;
+			execute_nodes(&node);
 		}
 	}
 }
@@ -98,6 +89,61 @@ void Style_Setup() {
 	style.FramePadding.x = 20;
 }
 
+void Exec_Flow_Example() {
+	Node* node;
+
+	node = SpawnExec();		ed::SetNodePosition(node->ID, ImVec2(-17, -196));
+	node = SpawnNodeA();		ed::SetNodePosition(node->ID, ImVec2(120, -196));
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[0].Outputs[0].ID, s_Nodes[1].Inputs[0].ID));
+	node = SpawnNodeB();		ed::SetNodePosition(node->ID, ImVec2(297, -196));
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[1].Outputs[0].ID, s_Nodes[2].Inputs[0].ID));
+	node = SpawnNodeA();		ed::SetNodePosition(node->ID, ImVec2(427, -196));
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[2].Outputs[0].ID, s_Nodes[3].Inputs[0].ID));
+
+
+	node = SpawnExec();      ed::SetNodePosition(node->ID, ImVec2(-17, 120));
+	node = SpawnNodeA();      ed::SetNodePosition(node->ID, ImVec2(120, 120));
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[4].Outputs[0].ID, s_Nodes[5].Inputs[0].ID));
+	node = SpawnSequence();      ed::SetNodePosition(node->ID, ImVec2(297, 122));
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[5].Outputs[0].ID, s_Nodes[6].Inputs[0].ID));
+	node = SpawnNodeB();      ed::SetNodePosition(node->ID, ImVec2(489, 56));
+	node = SpawnNodeA();              ed::SetNodePosition(node->ID, ImVec2(632, 56));
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[7].Outputs[0].ID, s_Nodes[8].Inputs[0].ID));
+	node = SpawnNodeB();              ed::SetNodePosition(node->ID, ImVec2(489, 152));
+	node = SpawnNodeB();              ed::SetNodePosition(node->ID, ImVec2(633, 152));
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[9].Outputs[0].ID, s_Nodes[10].Inputs[0].ID));
+	node = SpawnNodeA();              ed::SetNodePosition(node->ID, ImVec2(488, 264));
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[6].Outputs[0].ID, s_Nodes[7].Inputs[0].ID));
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[6].Outputs[1].ID, s_Nodes[9].Inputs[0].ID));
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[6].Outputs[2].ID, s_Nodes[11].Inputs[0].ID));
+}
+
+void BP_FULL_Example() {
+	Node* node;
+
+	node = SpawnExec();			ed::SetNodePosition(node->ID, ImVec2(-561, -868));
+	node = SpawnRSI();			ed::SetNodePosition(node->ID, ImVec2(184, -864));
+	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(409, -868));
+	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(632, -1088));
+	node = SpawnSequence();			ed::SetNodePosition(node->ID, ImVec2(632, -848));
+	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(632, -592));
+	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(-358, -864));
+	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(60, -704));
+	node = SpawnADD();			ed::SetNodePosition(node->ID, ImVec2(545, -960));
+	node = SpawnSubtract();			ed::SetNodePosition(node->ID, ImVec2(528, -720));
+	node = SpawnMultiply();			ed::SetNodePosition(node->ID, ImVec2(536, -464));
+	node = SpawnDivide();			ed::SetNodePosition(node->ID, ImVec2(-160, -614));
+	node = SpawnFloatInputNode();			ed::SetNodePosition(node->ID, ImVec2(304, -934));
+	node = SpawnFloatInputNode();			ed::SetNodePosition(node->ID, ImVec2(320, -630));
+	node = SpawnFloatInputNode();			ed::SetNodePosition(node->ID, ImVec2(320, -374));
+	node = SpawnFloatInputNode();			ed::SetNodePosition(node->ID, ImVec2(-600, -742));
+	node = SpawnStringInputNode();			ed::SetNodePosition(node->ID, ImVec2(-24, -864));
+
+	//node = SpawnNodeA();		ed::SetNodePosition(node->ID, ImVec2(120, -196));
+	//s_Links.push_back(Link(GetNextLinkId(), s_Nodes[0].Outputs[0].ID, s_Nodes[1].Inputs[0].ID));
+
+}
+
 void Application_Initialize()
 {
 	auto& io = ImGui::GetIO();
@@ -134,16 +180,8 @@ void Application_Initialize()
     m_Editor = ed::CreateEditor(&config);
     ed::SetCurrentEditor(m_Editor);
 
-    Node* node;
-
-	node = SpawnExec();		ed::SetNodePosition(node->ID, ImVec2(0, 0));
-	//node = SpawnRSI();      ed::SetNodePosition(node->ID, ImVec2(0, 0));
-	node = SpawnMACD();      ed::SetNodePosition(node->ID, ImVec2(0, 150));
-	node = SpawnOBV();      ed::SetNodePosition(node->ID, ImVec2(0, 300));
-	node = SpawnWILLIAMS();      ed::SetNodePosition(node->ID, ImVec2(0, 450));
-	node = SpawnIchimokuCloud();      ed::SetNodePosition(node->ID, ImVec2(0, 600));
-    node = SpawnComment();              ed::SetNodePosition(node->ID, ImVec2(0, 750));
-    node = SpawnComment();              ed::SetNodePosition(node->ID, ImVec2(500, 750));
+	//Exec_Flow_Example();
+	BP_FULL_Example();
 
 
     ed::NavigateToContent();
@@ -155,7 +193,6 @@ void Application_Initialize()
     s_RestoreIcon      = Application_LoadTexture("Data/ic_restore_white_24dp.png");
 
 	Style_Setup();
-	executionThread = std::thread(Execution_Thread);
 }
 
 void Application_Finalize()
@@ -178,8 +215,9 @@ void Application_Finalize()
         ed::DestroyEditor(m_Editor);
         m_Editor = nullptr;
     }
-	if (executionThread.joinable())
+	if (executionThread.joinable()) {
 		executionThread.join();
+	}
 }
 
 
@@ -583,31 +621,7 @@ void NodeEditorViewport() {
 				}
 				if (input.Type == PinType::Bool)
 				{
-					if (ImGui::Button("RUN ME")) {
-						if (input.Node->Name == "RSI") {
-							std::cout << "RUN RST with " << input.Node->data << std::endl;
-							std::cout << "result =" << py::RSI(input.Node->data.c_str()) << std::endl;
-						}
-						else if (input.Node->Name == "OBV") {
-							std::cout << "RUN OBV with " << input.Node->data << std::endl;
-							std::cout << "result =" << py::OBV(input.Node->data.c_str()) << std::endl;
-						}
-						else if (input.Node->Name == "MACD") {
-							std::cout << "RUN MCAD with " << input.Node->data << std::endl;
-							std::cout << "result =" << py::MACD(input.Node->data.c_str()) << std::endl;
-
-						}
-						else if (input.Node->Name == "WILLIAMS") {
-							std::cout << "RUN WILLIAMS with " << input.Node->data << std::endl;
-							std::cout << "result =" << py::WILLIAMS(input.Node->data.c_str()) << std::endl;
-
-						}
-						else if (input.Node->Name == "IchimokuCloud") {
-							std::cout << "RUN IchimokuCloud with " << input.Node->data << std::endl;
-							std::cout << "result =" << py::IchimokuCloud(input.Node->data.c_str()) << std::endl;
-
-						}
-					}
+					ImGui::Button("Hello");
 					ImGui::Spring(0);
 				}
 				ImGui::PopStyleVar();
@@ -634,14 +648,26 @@ void NodeEditorViewport() {
 
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 				builder.Output(output.ID);
-				if (output.Type == PinType::String)
+				if (output.Node->isInputNode && (output.Type == PinType::String || output.Type == PinType::Float)) //support float/string input nodes only for now
 				{
-					static char buffer[128] = "Edit Me";
+					//TODO: fix BUFFER performance
+					char buffer[128] = "";
+					if (!output.sting_data.empty())
+						memcpy(buffer, output.sting_data.c_str(), output.sting_data.size());
 					static bool wasActive = false;
 
 					ImGui::PushItemWidth(100.0f);
+
 					if (ImGui::InputText("##edit", buffer, 127)) {
-						output.Node->data = buffer;
+						if (output.Type == PinType::String)
+						{
+							output.sting_data = buffer;
+						}
+						else if (output.Type == PinType::Float)
+						{
+							output.sting_data = buffer;
+							output.float_data = ::atof(buffer);
+						}
 					}
 					ImGui::PopItemWidth();
 					if (ImGui::IsItemActive() && !wasActive)
@@ -1203,14 +1229,25 @@ void NodeEditorViewport() {
 		ImGui::Separator();
 		if (ImGui::MenuItem("Exec"))
 			node = SpawnExec();
-		if (ImGui::MenuItem("Node A"))
-			node = SpawnNodeA();
-		if (ImGui::MenuItem("Node B"))
-			node = SpawnNodeB();
 		if (ImGui::MenuItem("Sequence"))
 			node = SpawnSequence();
-		if (ImGui::MenuItem("Input"))
-			node = SpawnInputNode();
+		ImGui::Separator();
+		if (ImGui::MenuItem("+"))
+			node = SpawnADD();
+		if (ImGui::MenuItem("-"))
+			node = SpawnSubtract();
+		if (ImGui::MenuItem("x"))
+			node = SpawnMultiply();
+		if (ImGui::MenuItem("/"))
+			node = SpawnDivide();
+		ImGui::Separator();
+		if (ImGui::MenuItem("String Input"))
+			node = SpawnStringInputNode();
+		if (ImGui::MenuItem("Float Input"))
+			node = SpawnFloatInputNode();
+		ImGui::Separator();
+		if (ImGui::MenuItem("Print Float"))
+			node = SpawnPrintFloat();
 		ImGui::Separator();
 		/*if (ImGui::MenuItem("Input Action"))
 			node = SpawnInputActionNode();
@@ -1336,9 +1373,13 @@ void library_pane() {
 
 	if (ImGui::Button("Run"))
 	{
-		thread_run_once = true;
+		if (executionThread.joinable()) {
+			executionThread.join();
+			executionThread = std::thread(Execution_Thread);
+		}
+		else
+			executionThread = std::thread(Execution_Thread);
 	}
-
 
 	ImGui::End();
 }
