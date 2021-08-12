@@ -12,9 +12,9 @@ void Application_Finalize();
 void Application_Frame();
 
 namespace py {
-	double RSI(const char *);
-	double OBV(const char *);
-	double MACD(const char *);
-	double IchimokuCloud(const char *);
-	double WILLIAMS(const char *);
+	float RSI(const char *);
+	float OBV(const char *stock, const char *start_date, const char *end_date);
+	float MACD(const char *stock, const char *start_date, const char *end_date);
+	float IchimokuCloud(const char *stock, const char *start_date, const char *end_date);
+	float WILLIAMS(const char *stock, const char *start_date, const char *end_date);
 }

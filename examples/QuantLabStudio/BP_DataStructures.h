@@ -45,16 +45,17 @@ struct Pin
 	std::string Name;
 	PinType     Type;
 	PinKind     Kind;
+	bool valid_exec;
 
 	Pin(int id, const char* name, PinType type) :
-		ID(id), Node(nullptr), Name(name), Type(type), Kind(PinKind::Input)
+		ID(id), Node(nullptr), Name(name), Type(type), Kind(PinKind::Input), valid_exec(true), bool_data(false)
 	{
 		float_data = 0.0f;
 	}
 
-
 	float float_data;
 	std::string sting_data;
+	bool bool_data;
 };
 
 struct Node
@@ -355,11 +356,62 @@ float get_float_input(ed::NodeId id, int input_pin_index)
 	return 0.0f;
 }
 
+//helper for get_bool_input
+float evaluate_node_and_get_bool(Node * node, Pin * output_pin)
+{
+	node->exec();
+	return output_pin->bool_data;
+}
+
+
+bool get_bool_input(ed::NodeId id, int input_pin_index)
+{
+	Node * node = FindNode(id);
+	Pin * pin = &(node->Inputs[input_pin_index]);
+	if (pin->Type == PinType::Bool)
+	{
+		// if linked with pin is input node (to do implement input node type) -> get value
+		// if not evaluate node and get output at pin id
+		Pin * connected_pin = FindLinkedPin(pin->ID);
+		if (connected_pin)
+		{
+			Node * node = connected_pin->Node;
+			if (node->Type == NodeType::Simple)
+			{
+				return evaluate_node_and_get_bool(node, connected_pin);
+			}
+			else
+			{
+				return connected_pin->bool_data;
+			}
+		}
+		else
+		{
+			// not connected to any node
+			return pin->bool_data;
+		}
+	}
+	else {
+		// wrong exec function 
+		std::cout << "wrong exec function " << std::endl;
+		throw;
+	}
+	return false;
+}
+
 void set_float_output(ed::NodeId id, int output_pin_index, float result)
 {
 	Node * node = FindNode(id);
 	Pin * pin = &(node->Outputs[output_pin_index]);
 	pin->float_data = result;
+
+}
+
+void set_bool_output(ed::NodeId id, int output_pin_index, float result)
+{
+	Node * node = FindNode(id);
+	Pin * pin = &(node->Outputs[output_pin_index]);
+	pin->bool_data = result;
 
 }
 

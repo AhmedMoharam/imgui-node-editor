@@ -21,7 +21,7 @@ static void execute_nodes(Node * node) {
 
 	for (auto & outpin : node->Outputs)
 	{
-		if (outpin.Type == PinType::Flow)
+		if (outpin.Type == PinType::Flow && outpin.valid_exec == true)
 		{
 			Pin* connected_pin = FindLinkedPin(outpin.ID);
 			if (connected_pin)
@@ -89,7 +89,9 @@ void Style_Setup() {
 	style.FramePadding.x = 20;
 }
 
-void Exec_Flow_Example() {
+ImColor GetIconColor(PinType type);
+
+void Example1() {
 	Node* node;
 
 	node = SpawnExec();		ed::SetNodePosition(node->ID, ImVec2(-17, -196));
@@ -118,29 +120,232 @@ void Exec_Flow_Example() {
 	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[6].Outputs[2].ID, s_Nodes[11].Inputs[0].ID));
 }
 
-void BP_FULL_Example() {
+void Example2() {
 	Node* node;
 
 	node = SpawnExec();			ed::SetNodePosition(node->ID, ImVec2(-561, -868));
-	node = SpawnRSI();			ed::SetNodePosition(node->ID, ImVec2(184, -864));
-	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(409, -868));
-	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(632, -1088));
-	node = SpawnSequence();			ed::SetNodePosition(node->ID, ImVec2(632, -848));
-	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(632, -592));
-	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(-358, -864));
-	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(60, -704));
-	node = SpawnADD();			ed::SetNodePosition(node->ID, ImVec2(545, -960));
-	node = SpawnSubtract();			ed::SetNodePosition(node->ID, ImVec2(528, -720));
-	node = SpawnMultiply();			ed::SetNodePosition(node->ID, ImVec2(536, -464));
-	node = SpawnDivide();			ed::SetNodePosition(node->ID, ImVec2(-160, -614));
-	node = SpawnFloatInputNode();			ed::SetNodePosition(node->ID, ImVec2(304, -934));
-	node = SpawnFloatInputNode();			ed::SetNodePosition(node->ID, ImVec2(320, -630));
-	node = SpawnFloatInputNode();			ed::SetNodePosition(node->ID, ImVec2(320, -374));
-	node = SpawnFloatInputNode();			ed::SetNodePosition(node->ID, ImVec2(-600, -742));
-	node = SpawnStringInputNode();			ed::SetNodePosition(node->ID, ImVec2(-24, -864));
+	node = SpawnRSI();			ed::SetNodePosition(node->ID, ImVec2(-358, -864));
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[0].Outputs[0].ID, s_Nodes[1].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[0].Outputs[0].Type);
+	node = SpawnStringInputNode();			ed::SetNodePosition(node->ID, ImVec2(-600, -742));
+	node->Outputs[0].sting_data = "MSFT";
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[2].Outputs[0].ID, s_Nodes[1].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[2].Outputs[0].Type);
+	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(-24, -864));
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[1].Outputs[0].ID, s_Nodes[3].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[1].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[1].Outputs[1].ID, s_Nodes[3].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[1].Outputs[1].Type);
+	node = SpawnDivide();			ed::SetNodePosition(node->ID, ImVec2(60, -704));
+	node = SpawnFloatInputNode();			ed::SetNodePosition(node->ID, ImVec2(-160, -614));
+	node->Outputs[0].sting_data = "2";
+	node->Outputs[0].float_data= 2.0f;
+	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(184, -864));
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[3].Outputs[0].ID, s_Nodes[6].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[3].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[1].Outputs[1].ID, s_Nodes[4].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[1].Outputs[1].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[5].Outputs[0].ID, s_Nodes[4].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[5].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[4].Outputs[0].ID, s_Nodes[6].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[4].Outputs[0].Type);
+
+	node = SpawnSequence();			ed::SetNodePosition(node->ID, ImVec2(409, -868)); //7
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[6].Outputs[0].ID, s_Nodes[7].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[6].Outputs[0].Type);
+
+	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(632, -1088)); //8
+	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(632, -848)); //9
+	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(632, -592)); //10
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[7].Outputs[0].ID, s_Nodes[8].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[7].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[7].Outputs[1].ID, s_Nodes[9].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[7].Outputs[1].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[7].Outputs[2].ID, s_Nodes[10].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[7].Outputs[2].Type);
+
+	
+	
+	node = SpawnADD();			ed::SetNodePosition(node->ID, ImVec2(545, -960)); //11
+	node = SpawnFloatInputNode();			ed::SetNodePosition(node->ID, ImVec2(304, -934)); //12
+	node->Outputs[0].sting_data = "10";
+	node->Outputs[0].float_data = 10.0f;
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[11].Outputs[0].ID, s_Nodes[8].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[11].Outputs[0].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[1].Outputs[1].ID, s_Nodes[11].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[1].Outputs[1].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[12].Outputs[0].ID, s_Nodes[11].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[12].Outputs[0].Type);
+
+	 
+	node = SpawnSubtract();			ed::SetNodePosition(node->ID, ImVec2(528, -720)); //13
+	node = SpawnFloatInputNode();			ed::SetNodePosition(node->ID, ImVec2(320, -630)); //14
+	node->Outputs[0].sting_data = "5";
+	node->Outputs[0].float_data = 5.0f;
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[13].Outputs[0].ID, s_Nodes[9].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[13].Outputs[0].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[1].Outputs[1].ID, s_Nodes[13].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[1].Outputs[1].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[14].Outputs[0].ID, s_Nodes[13].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[14].Outputs[0].Type);
+
+
+
+
+	node = SpawnMultiply();			ed::SetNodePosition(node->ID, ImVec2(536, -464));  //15
+	node = SpawnFloatInputNode();			ed::SetNodePosition(node->ID, ImVec2(320, -374)); //16
+	node->Outputs[0].sting_data = "2";
+	node->Outputs[0].float_data = 2.0f;
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[15].Outputs[0].ID, s_Nodes[10].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[15].Outputs[0].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[1].Outputs[1].ID, s_Nodes[15].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[1].Outputs[1].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[16].Outputs[0].ID, s_Nodes[15].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[16].Outputs[0].Type);
+
+
+	
+	
 
 	//node = SpawnNodeA();		ed::SetNodePosition(node->ID, ImVec2(120, -196));
 	//s_Links.push_back(Link(GetNextLinkId(), s_Nodes[0].Outputs[0].ID, s_Nodes[1].Inputs[0].ID));
+
+}
+
+void Example3() 
+{
+	Node* node;
+
+	node = SpawnExec();			ed::SetNodePosition(node->ID, ImVec2(-561, -868)); //0
+	node = SpawnRSI();			ed::SetNodePosition(node->ID, ImVec2(-406, -868)); //1
+	node = SpawnStringInputNode();			ed::SetNodePosition(node->ID, ImVec2(-648, -746)); //2
+	node->Outputs[0].sting_data = "MSFT";
+	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(-56, -868)); //3
+	node = SpawnSequence();			ed::SetNodePosition(node->ID, ImVec2(185, -868)); //4
+	node = SpawnMACD();			ed::SetNodePosition(node->ID, ImVec2(587, -1051)); //5
+	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(903, -1044)); //6
+	node = SpawnOBV();			ed::SetNodePosition(node->ID, ImVec2(587, -780)); //7
+	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(903, -772)); //8
+	node = SpawnWILLIAMS();			ed::SetNodePosition(node->ID, ImVec2(587, -464)); //9
+	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(903, -464)); //10
+	node = SpawnIchimokuCloud();			ed::SetNodePosition(node->ID, ImVec2(587, -104)); //11
+	node = SpawnStringInputNode();			ed::SetNodePosition(node->ID, ImVec2(110, -550)); //12
+	node->Outputs[0].sting_data = "TSLA";
+	node = SpawnStringInputNode();			ed::SetNodePosition(node->ID, ImVec2(110, -483)); //13
+	node->Outputs[0].sting_data = "2019-01-01";
+	node = SpawnStringInputNode();			ed::SetNodePosition(node->ID, ImVec2(110, -326)); //14
+	node->Outputs[0].sting_data = "2021-01-01";
+	node = SpawnBranch();			ed::SetNodePosition(node->ID, ImVec2(1123, -96)); //15
+	node = SpawnLessThan();			ed::SetNodePosition(node->ID, ImVec2(999, 144)); //16
+	node = SpawnFloatInputNode();			ed::SetNodePosition(node->ID, ImVec2(753, 238)); //17
+	node->Outputs[0].sting_data = "40";
+	node->Outputs[0].float_data = 40.0f;
+	node = SpawnPrintString();			ed::SetNodePosition(node->ID, ImVec2(1571, -284)); //18
+	node = SpawnStringInputNode();			ed::SetNodePosition(node->ID, ImVec2(1471, -82)); //19
+	node->Outputs[0].sting_data = "< Than 40";
+	node = SpawnPrintString();			ed::SetNodePosition(node->ID, ImVec2(1571, 162)); //20
+	node = SpawnStringInputNode();			ed::SetNodePosition(node->ID, ImVec2(1471, 334)); //21
+	node->Outputs[0].sting_data = "> Than 40";
+
+	node = SpawnPrintFloat();			ed::SetNodePosition(node->ID, ImVec2(920, -96)); //22
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[0].Outputs[0].ID, s_Nodes[1].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[0].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[2].Outputs[0].ID, s_Nodes[1].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[2].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[1].Outputs[0].ID, s_Nodes[3].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[1].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[1].Outputs[1].ID, s_Nodes[3].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[1].Outputs[1].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[3].Outputs[0].ID, s_Nodes[4].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[3].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[4].Outputs[0].ID, s_Nodes[5].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[4].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[4].Outputs[1].ID, s_Nodes[7].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[4].Outputs[1].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[4].Outputs[2].ID, s_Nodes[9].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[4].Outputs[2].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[12].Outputs[0].ID, s_Nodes[5].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[12].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[13].Outputs[0].ID, s_Nodes[5].Inputs[2].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[13].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[14].Outputs[0].ID, s_Nodes[5].Inputs[3].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[14].Outputs[0].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[5].Outputs[0].ID, s_Nodes[6].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[5].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[5].Outputs[1].ID, s_Nodes[6].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[5].Outputs[1].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[12].Outputs[0].ID, s_Nodes[7].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[12].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[13].Outputs[0].ID, s_Nodes[7].Inputs[2].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[13].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[14].Outputs[0].ID, s_Nodes[7].Inputs[3].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[14].Outputs[0].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[7].Outputs[0].ID, s_Nodes[8].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[7].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[7].Outputs[1].ID, s_Nodes[8].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[7].Outputs[1].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[12].Outputs[0].ID, s_Nodes[9].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[12].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[13].Outputs[0].ID, s_Nodes[9].Inputs[2].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[13].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[14].Outputs[0].ID, s_Nodes[9].Inputs[3].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[14].Outputs[0].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[9].Outputs[0].ID, s_Nodes[10].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[9].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[9].Outputs[1].ID, s_Nodes[10].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[9].Outputs[1].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[12].Outputs[0].ID, s_Nodes[11].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[12].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[13].Outputs[0].ID, s_Nodes[11].Inputs[2].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[13].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[14].Outputs[0].ID, s_Nodes[11].Inputs[3].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[14].Outputs[0].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[10].Outputs[0].ID, s_Nodes[11].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[10].Outputs[0].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[11].Outputs[0].ID, s_Nodes[22].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[11].Outputs[0].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[11].Outputs[1].ID, s_Nodes[22].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[11].Outputs[0].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[22].Outputs[0].ID, s_Nodes[15].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[22].Outputs[0].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[11].Outputs[1].ID, s_Nodes[16].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[11].Outputs[1].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[17].Outputs[0].ID, s_Nodes[16].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[17].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[16].Outputs[0].ID, s_Nodes[15].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[16].Outputs[0].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[19].Outputs[0].ID, s_Nodes[18].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[19].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[15].Outputs[0].ID, s_Nodes[18].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[15].Outputs[0].Type);
+
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[21].Outputs[0].ID, s_Nodes[20].Inputs[1].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[21].Outputs[0].Type);
+	s_Links.push_back(Link(GetNextLinkId(), s_Nodes[15].Outputs[1].ID, s_Nodes[20].Inputs[0].ID));
+	s_Links.back().Color = GetIconColor(s_Nodes[15].Outputs[1].Type);
+
 
 }
 
@@ -181,7 +386,7 @@ void Application_Initialize()
     ed::SetCurrentEditor(m_Editor);
 
 	//Exec_Flow_Example();
-	BP_FULL_Example();
+	Example3();
 
 
     ed::NavigateToContent();
@@ -619,9 +824,9 @@ void NodeEditorViewport() {
 					ImGui::TextUnformatted(input.Name.c_str());
 					ImGui::Spring(0);
 				}
-				if (input.Type == PinType::Bool)
+				if (input.Type == PinType::Bool && !IsPinLinked(input.ID))
 				{
-					ImGui::Button("Hello");
+					ImGui::Checkbox("", &input.bool_data);
 					ImGui::Spring(0);
 				}
 				ImGui::PopStyleVar();
@@ -656,7 +861,7 @@ void NodeEditorViewport() {
 						memcpy(buffer, output.sting_data.c_str(), output.sting_data.size());
 					static bool wasActive = false;
 
-					ImGui::PushItemWidth(100.0f);
+					ImGui::PushItemWidth(110.0f);
 
 					if (ImGui::InputText("##edit", buffer, 127)) {
 						if (output.Type == PinType::String)
@@ -1231,6 +1436,9 @@ void NodeEditorViewport() {
 			node = SpawnExec();
 		if (ImGui::MenuItem("Sequence"))
 			node = SpawnSequence();
+		if (ImGui::MenuItem("Branch"))
+			node = SpawnBranch();
+
 		ImGui::Separator();
 		if (ImGui::MenuItem("+"))
 			node = SpawnADD();
@@ -1240,14 +1448,26 @@ void NodeEditorViewport() {
 			node = SpawnMultiply();
 		if (ImGui::MenuItem("/"))
 			node = SpawnDivide();
+		if (ImGui::MenuItem("<"))
+			node = SpawnLessThan();
+		if (ImGui::MenuItem("<="))
+			node = SpawnLessThanOrEqual();
+		if (ImGui::MenuItem(">"))
+			node = SpawnMoreThan();
+		if (ImGui::MenuItem(">="))
+			node = SpawnMoreThanOrEqual();
+
 		ImGui::Separator();
 		if (ImGui::MenuItem("String Input"))
 			node = SpawnStringInputNode();
 		if (ImGui::MenuItem("Float Input"))
 			node = SpawnFloatInputNode();
+		
 		ImGui::Separator();
 		if (ImGui::MenuItem("Print Float"))
 			node = SpawnPrintFloat();
+		if (ImGui::MenuItem("Print String"))
+			node = SpawnPrintString();
 		ImGui::Separator();
 		/*if (ImGui::MenuItem("Input Action"))
 			node = SpawnInputActionNode();

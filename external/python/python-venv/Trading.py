@@ -37,7 +37,7 @@ class TradingClass:
         df['RS'] = df['avg_gain'] / df['avg_loss']
         df['RSI'] = 100 - (100 / (1 + df['RS']))
         #print(df['RSI'][::-1][0])
-        return df['RSI'][::-1][0]
+        return float(df['RSI'][::-1][0])
 
     def OBV(self, stock, start='2020-01-01', end='2021-01-01', days=14):
         df = yf.download(stock, start, end)
@@ -53,7 +53,7 @@ class TradingClass:
 
         #print(obv[::-1][0])
 
-        return int(obv[::-1][0])
+        return float(obv[::-1][0])
 
     def MACD(self, stock, start='2020-01-01', end='2021-01-01', PRICE_NAME="Close", period1=26, period2=12, period3=9):
         df = yf.download(stock, start, end)
@@ -63,11 +63,12 @@ class TradingClass:
         MACD_Signal_line = MACD_line.ewm(span=period3, adjust=False).mean()
         MACD_Histogram = MACD_line - MACD_Signal_line
         #print(MACD_line, MACD_Signal_line, MACD_Histogram)
-
-        return MACD_line[::-1][0]
+		#print(MACD_line[::-1][0])
+        return float(MACD_line[::-1][0])
 
     def IchimokuCloud(self, Stock, startDate='2019-01-01', endDate='2021-01-01'):
         # df = yf.download('AAPL', '2019-01-01', '2021-01-01')
+        #print ("start date: {}, end date: {}".format(startDate, endDate))
         df = yf.download(Stock, startDate, endDate)
 
         # Define length of Tenkan Sen or Conversion Line
@@ -105,8 +106,8 @@ class TradingClass:
 
         # Drop NA values from Dataframe
         df.dropna(inplace=True)
-
-        return df[::-1]["base_line"][0]
+		#print(df[::-1]["base_line"][0])
+        return float(df[::-1]["base_line"][0])
 
     def WILLIAMS(self, stock, start='2020-01-01', end='2021-01-01', days=14):
         df = yf.download(stock, start, end)

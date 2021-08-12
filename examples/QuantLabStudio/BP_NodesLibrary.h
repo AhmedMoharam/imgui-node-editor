@@ -2,7 +2,7 @@
 #include <iostream>
 #define EXEC_NODE_NAME "Exec"
 
-
+const bool verbose = false;
 
 
 
@@ -12,7 +12,10 @@ static Node* SpawnExec()
 	s_Nodes.emplace_back(node_id, EXEC_NODE_NAME , ImColor(255, 255, 255));
 	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-	s_Nodes.back().setExec([]() -> void {std::cout << "Hello from inside exec" << std::endl; });
+	s_Nodes.back().setExec([]() -> void {
+		if (verbose)
+			std::cout << "Hello from inside exec" << std::endl; 
+		});
 	BuildNode(&s_Nodes.back());
 	return &s_Nodes.back();
 }
@@ -47,7 +50,42 @@ static Node* SpawnSequence()
 	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
 	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-	s_Nodes.back().setExec([]() -> void {std::cout << "Hello from inside Sequence" << std::endl; });
+	s_Nodes.back().setExec([]() -> void {
+		if (verbose)
+			std::cout << "Hello from inside Sequence" << std::endl; 
+		});
+	BuildNode(&s_Nodes.back());
+	return &s_Nodes.back();
+}
+
+static Node* SpawnBranch()
+{
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "Branch", ImColor(255, 225, 225));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Condition", PinType::Bool);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "True", PinType::Flow);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "False", PinType::Flow);
+
+	s_Nodes.back().setExec([node_id]() -> void {
+		bool condition = get_bool_input(node_id, 1);
+		Node * node = FindNode(node_id);
+		if (condition)
+		{	
+			node->Outputs[0].valid_exec = true;
+			node->Outputs[1].valid_exec = false;
+			if (verbose)
+				std::cout << "Branch: Condition is True " << std::endl;
+		}
+		else
+		{
+			node->Outputs[0].valid_exec = false;
+			node->Outputs[1].valid_exec = true;
+			if (verbose)
+				std::cout << "Branch: Condition is False " << std::endl;
+		}
+				
+	});
 	BuildNode(&s_Nodes.back());
 	return &s_Nodes.back();
 }
@@ -65,7 +103,8 @@ static Node* SpawnADD()
 			float input1 = get_float_input(node_id, 0);
 			float input2 = get_float_input(node_id, 1);
 			float result = input1 + input2;
-			std::cout << "ADD " << input1 << "+" << input2 << "=" << result << std::endl;
+			if (verbose)
+				std::cout << "ADD " << input1 << "+" << input2 << "=" << result << std::endl;
 			set_float_output(node_id, 0, result);
 		});
 
@@ -87,7 +126,8 @@ static Node* SpawnSubtract()
 			float input1 = get_float_input(node_id, 0);
 			float input2 = get_float_input(node_id, 1);
 			float result = input1 - input2;
-			std::cout << "Subtract " << input1 << "-" << input2 << "=" << result << std::endl;
+			if (verbose)
+				std::cout << "Subtract " << input1 << "-" << input2 << "=" << result << std::endl;
 			set_float_output(node_id, 0, result);
 		});
 
@@ -109,7 +149,8 @@ static Node* SpawnMultiply()
 			float input1 = get_float_input(node_id, 0);
 			float input2 = get_float_input(node_id, 1);
 			float result = input1 * input2;
-			std::cout << "Mul " << input1 << "x" << input2 << "=" << result << std::endl;
+			if (verbose)
+				std::cout << "Mul " << input1 << "x" << input2 << "=" << result << std::endl;
 			set_float_output(node_id, 0, result);
 		});
 
@@ -131,8 +172,101 @@ static Node* SpawnDivide()
 			float input1 = get_float_input(node_id, 0);
 			float input2 = get_float_input(node_id, 1);
 			float result = input1 / input2;
-			std::cout << "Div " << input1 << "/" << input2 << "=" << result << std::endl;
+			if (verbose)
+				std::cout << "Div " << input1 << "/" << input2 << "=" << result << std::endl;
 			set_float_output(node_id, 0, result);
+		});
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+static Node* SpawnLessThan()
+{
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "<", ImColor(128, 195, 248));
+	s_Nodes.back().Type = NodeType::Simple;
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Bool);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			float input1 = get_float_input(node_id, 0);
+			float input2 = get_float_input(node_id, 1);
+			bool result = input1 < input2;
+			set_bool_output(node_id, 0, result);
+			if (verbose)
+				std::cout << "Less Than " << input1 << "<" << input2 << "=" << std::boolalpha << result << std::endl;
+		});
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+static Node* SpawnLessThanOrEqual()
+{
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "<=", ImColor(128, 195, 248));
+	s_Nodes.back().Type = NodeType::Simple;
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Bool);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			float input1 = get_float_input(node_id, 0);
+			float input2 = get_float_input(node_id, 1);
+			bool result = input1 <= input2;
+			set_bool_output(node_id, 0, result);
+			if (verbose)
+				std::cout << "Less Than Or Equal" << input1 << "<=" << input2 << "=" << std::boolalpha << result << std::endl;
+		});
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+static Node* SpawnMoreThan()
+{
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, ">", ImColor(128, 195, 248));
+	s_Nodes.back().Type = NodeType::Simple;
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Bool);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			float input1 = get_float_input(node_id, 0);
+			float input2 = get_float_input(node_id, 1);
+			bool result = input1 > input2;
+			set_bool_output(node_id, 0, result);
+			if (verbose)
+				std::cout << "More Than " << input1 << ">" << input2 << "=" << std::boolalpha << result << std::endl;
+		});
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+static Node* SpawnMoreThanOrEqual()
+{
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, ">=", ImColor(128, 195, 248));
+	s_Nodes.back().Type = NodeType::Simple;
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Bool);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Float);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			float input1 = get_float_input(node_id, 0);
+			float input2 = get_float_input(node_id, 1);
+			bool result = input1 >= input2;
+			set_bool_output(node_id, 0, result);
+			if (verbose)
+				std::cout << "More Than Or Equal" << input1 << ">=" << input2 << "=" << std::boolalpha << result << std::endl;
 		});
 
 	BuildNode(&s_Nodes.back());
@@ -153,6 +287,24 @@ static Node* SpawnPrintFloat()
 		{
 			float result = get_float_input(node_id, 1);
 			std::cout << "Print Float: " << result << std::endl;
+		});
+
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+static Node* SpawnPrintString()
+{
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "Print", ImColor(75, 0, 130));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "String", PinType::String);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			const char * result = get_string_input(node_id, 1);
+			std::cout << "Print String: " << result << std::endl;
 		});
 
 	BuildNode(&s_Nodes.back());
@@ -197,7 +349,8 @@ static Node* SpawnRSI()
 	s_Nodes.back().setExec([node_id]() -> void
 		{
 			float result = py::RSI(get_string_input(node_id, 1));
-			std::cout << "RSI " << result << std::endl;
+			if (verbose)
+				std::cout << "RSI " << result << std::endl;
 			set_float_output(node_id, 1, result);
 		});
 
@@ -208,9 +361,21 @@ static Node* SpawnRSI()
 
 static Node* SpawnMACD()
 {
-	s_Nodes.emplace_back(GetNextId(), "MACD", ImColor(255, 128, 128));
-	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Bool);
-	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Stock:", PinType::String);
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "MACD", ImColor(255, 128, 128));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Stock Name", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Start Date", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "End Date", PinType::String);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Result", PinType::Float);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			float result = py::MACD(get_string_input(node_id, 1), get_string_input(node_id, 2), get_string_input(node_id, 3));
+			if (verbose)
+				std::cout << "MACD " << result << std::endl;
+			set_float_output(node_id, 1, result);
+		});
 
 	BuildNode(&s_Nodes.back());
 
@@ -219,9 +384,21 @@ static Node* SpawnMACD()
 
 static Node* SpawnIchimokuCloud()
 {
-	s_Nodes.emplace_back(GetNextId(), "IchimokuCloud", ImColor(255, 128, 128));
-	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Bool);
-	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Stock:", PinType::String);
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "IchimokuCloud", ImColor(255, 128, 128));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Stock Name", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Start Date", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "End Date", PinType::String);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Result", PinType::Float);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			float result = py::IchimokuCloud(get_string_input(node_id, 1), get_string_input(node_id, 2), get_string_input(node_id, 3));
+			if (verbose)
+				std::cout << "IchimokuCloud " << result << std::endl;
+			set_float_output(node_id, 1, result);
+		});
 
 	BuildNode(&s_Nodes.back());
 
@@ -230,9 +407,21 @@ static Node* SpawnIchimokuCloud()
 
 static Node* SpawnOBV()
 {
-	s_Nodes.emplace_back(GetNextId(), "OBV", ImColor(255, 128, 128));
-	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Bool);
-	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Stock:", PinType::String);
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "OBV", ImColor(255, 128, 128));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Stock Name", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Start Date", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "End Date", PinType::String);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Result", PinType::Float);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			float result = py::OBV(get_string_input(node_id, 1), get_string_input(node_id, 2), get_string_input(node_id, 3));
+			if (verbose)
+				std::cout << "OBV " << result << std::endl;
+			set_float_output(node_id, 1, result);
+		});
 
 	BuildNode(&s_Nodes.back());
 
@@ -241,14 +430,28 @@ static Node* SpawnOBV()
 
 static Node* SpawnWILLIAMS()
 {
-	s_Nodes.emplace_back(GetNextId(), "WILLIAMS", ImColor(255, 128, 128));
-	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Bool);
-	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Stock:", PinType::String);
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "WILLIAMS", ImColor(255, 128, 128));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Stock Name", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Start Date", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "End Date", PinType::String);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Result", PinType::Float);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			float result = py::WILLIAMS(get_string_input(node_id, 1), get_string_input(node_id, 2), get_string_input(node_id, 3));
+			if (verbose)
+				std::cout << "WILLIAMS " << result << std::endl;
+			set_float_output(node_id, 1, result);
+		});
 
 	BuildNode(&s_Nodes.back());
 
 	return &s_Nodes.back();
 }
+
+// -------------------------------------------------------------------------------------------------------------------------------------
 
 static Node* SpawnInputActionNode()
 {
