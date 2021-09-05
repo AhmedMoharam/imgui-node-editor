@@ -7,11 +7,11 @@
 class Py_Trading {
 public:
 	Py_Trading();
-	float RSI(const char *);
-	float OBV(const char *stock, const char *start_date, const char *end_date);
-	float MACD(const char *stock, const char *start_date, const char *end_date);
+	float RSI(const char *, int);
+	float OBV(const char *stock, const char *start_date, const char *end_date, int days);
+	float MACD(const char *stock, const char *start_date, const char *end_date,const char *price_name,int period1, int period2, int period3);
 	float IchimokuCloud(const char *stock, const char *start_date, const char *end_date);
-	float WILLIAMS(const char *stock, const char *start_date, const char *end_date);
+	float WILLIAMS(const char *stock, const char *start_date, const char *end_date, int days);
 	virtual ~Py_Trading();
 private:
 	void init();
@@ -67,13 +67,13 @@ void Py_Trading::wait_init_done()
 	if (init_thread.joinable())
 		init_thread.join();
 }
-float Py_Trading::RSI(const char *stock)
+float Py_Trading::RSI(const char *stock,int days)
 {
 	wait_init_done();
 	try
 	{
 
-		boost::python::object value = Trading_object.attr("RSI")(stock);
+		boost::python::object value = Trading_object.attr("RSI")(stock, days);
 		return boost::python::extract<float>(value);;
 	}
 	catch (const boost::python::error_already_set&)
@@ -85,12 +85,12 @@ float Py_Trading::RSI(const char *stock)
 
 }
 
-float Py_Trading::OBV(const char *stock, const char *start_date, const char *end_date)
+float Py_Trading::OBV(const char *stock, const char *start_date, const char *end_date, int days)
 {
 	wait_init_done();
 	try
 	{
-		boost::python::object value = Trading_object.attr("OBV")(stock, start_date, end_date);
+		boost::python::object value = Trading_object.attr("OBV")(stock, start_date, end_date, days);
 		return boost::python::extract<float>(value);;
 	}
 	catch (const boost::python::error_already_set&)
@@ -101,14 +101,14 @@ float Py_Trading::OBV(const char *stock, const char *start_date, const char *end
 	}
 }
 
-float Py_Trading::MACD(const char *stock, const char *start_date, const char *end_date)
+float Py_Trading::MACD(const char *stock, const char *start_date, const char *end_date, const char *price_name, int period1, int period2, int period3)
 {
 	wait_init_done();
 	try
 	{
 		//2020-01-01
 		//2021-01-01
-		boost::python::object value = Trading_object.attr("MACD")(stock, start_date, end_date);
+		boost::python::object value = Trading_object.attr("MACD")(stock, start_date, end_date, price_name, period1, period2, period3);
 		return boost::python::extract<float>(value);;
 	}
 	catch (const boost::python::error_already_set&)
@@ -135,12 +135,12 @@ float Py_Trading::IchimokuCloud(const char *stock, const char *start_date, const
 	}
 }
 
-float Py_Trading::WILLIAMS(const char *stock, const char *start_date, const char *end_date)
+float Py_Trading::WILLIAMS(const char *stock, const char *start_date, const char *end_date, int days)
 {
 	wait_init_done();
 	try
 	{
-		boost::python::object value = Trading_object.attr("WILLIAMS")(stock, start_date, end_date);
+		boost::python::object value = Trading_object.attr("WILLIAMS")(stock, start_date, end_date, days);
 		return boost::python::extract<float>(value);;
 	}
 	catch (const boost::python::error_already_set&)
@@ -154,19 +154,19 @@ float Py_Trading::WILLIAMS(const char *stock, const char *start_date, const char
 
 static Py_Trading obj;
 
-float py::RSI(const char * stock)
+float py::RSI(const char *stock, int days)
 {
-	return obj.RSI(stock);
+	return obj.RSI(stock, days);
 }
 
-float py::OBV(const char *stock, const char *start_date, const char *end_date)
+float py::OBV(const char *stock, const char *start_date, const char *end_date, int days)
 {
-	return obj.OBV(stock, start_date, end_date);
+	return obj.OBV(stock, start_date, end_date, days);
 }
 
-float py::MACD(const char *stock, const char *start_date, const char *end_date)
+float py::MACD(const char *stock, const char *start_date, const char *end_date, const char *price_name, int period1, int period2, int period3)
 {
-	return obj.MACD(stock, start_date, end_date);
+	return obj.MACD(stock, start_date, end_date, price_name, period1, period2, period3);
 }
 
 float py::IchimokuCloud(const char *stock, const char *start_date, const char *end_date)
@@ -174,9 +174,9 @@ float py::IchimokuCloud(const char *stock, const char *start_date, const char *e
 	return obj.IchimokuCloud(stock, start_date, end_date);
 }
 
-float py::WILLIAMS(const char *stock, const char *start_date, const char *end_date)
+float py::WILLIAMS(const char *stock, const char *start_date, const char *end_date, int days)
 {
-	return obj.WILLIAMS(stock, start_date, end_date);
+	return obj.WILLIAMS(stock, start_date, end_date, days);
 }
 
 

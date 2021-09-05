@@ -829,6 +829,11 @@ void NodeEditorViewport() {
 					ImGui::Checkbox("", &input.bool_data);
 					ImGui::Spring(0);
 				}
+				if (input.Node->Name == "Print" && input.Type == PinType::Float)
+				{
+					ImGui::Button(std::to_string(input.float_data).c_str());
+					ImGui::Spring(0);
+				}
 				ImGui::PopStyleVar();
 				builder.EndInput();
 			}

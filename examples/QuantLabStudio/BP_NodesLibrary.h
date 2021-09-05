@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <limits>
 #define EXEC_NODE_NAME "Exec"
 
 const bool verbose = false;
@@ -285,7 +286,10 @@ static Node* SpawnPrintFloat()
 	s_Nodes.back().Inputs.emplace_back(GetNextId(), "float", PinType::Float);
 	s_Nodes.back().setExec([node_id]() -> void
 		{
-			float result = get_float_input(node_id, 1);
+			float result = get_float_input(node_id, 1); if (result == std::numeric_limits<float>::infinity()) result = 0.0f;
+			Node * node = FindNode(node_id);
+			Pin * pin = &(node->Inputs[1]);
+			pin->float_data = result;
 			std::cout << "Print Float: " << result << std::endl;
 		});
 
@@ -345,10 +349,14 @@ static Node* SpawnRSI()
 	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
 	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
 	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Stock Name", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "days", PinType::Float);
 	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Result", PinType::Float);
 	s_Nodes.back().setExec([node_id]() -> void
 		{
-			float result = py::RSI(get_string_input(node_id, 1));
+			const char * stock = get_string_input(node_id, 1);
+			float days = get_float_input(node_id, 2);	if (days == std::numeric_limits<float>::infinity())	days = 20;
+
+			float result = py::RSI(stock, static_cast<int>(days));
 			if (verbose)
 				std::cout << "RSI " << result << std::endl;
 			set_float_output(node_id, 1, result);
@@ -368,10 +376,22 @@ static Node* SpawnMACD()
 	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Stock Name", PinType::String);
 	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Start Date", PinType::String);
 	s_Nodes.back().Inputs.emplace_back(GetNextId(), "End Date", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Price Name", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Period 1", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Period 2", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Period 3", PinType::Float);
 	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Result", PinType::Float);
 	s_Nodes.back().setExec([node_id]() -> void
 		{
-			float result = py::MACD(get_string_input(node_id, 1), get_string_input(node_id, 2), get_string_input(node_id, 3));
+			const char * stock = get_string_input(node_id, 1);
+			const char * start_date = get_string_input(node_id, 2); if (!start_date) start_date = "2020-01-01";
+			const char * end_date = get_string_input(node_id, 3);	if (!end_date) end_date = "2021-01-01";
+			const char * price_name = get_string_input(node_id, 4);	if (!price_name) price_name = "Close";
+			float period1 = get_float_input(node_id, 5);	if (period1 == std::numeric_limits<float>::infinity()) period1 = 26.0f;
+			float period2 = get_float_input(node_id, 6);	if (period2 == std::numeric_limits<float>::infinity()) period2 = 12.0f;
+			float period3 = get_float_input(node_id, 7);	if (period3 == std::numeric_limits<float>::infinity()) period3 = 9.0f;
+			
+			float result = py::MACD(stock, start_date, end_date, price_name, static_cast<int>(period1), static_cast<int>(period2), static_cast<int>(period3));
 			if (verbose)
 				std::cout << "MACD " << result << std::endl;
 			set_float_output(node_id, 1, result);
@@ -394,7 +414,11 @@ static Node* SpawnIchimokuCloud()
 	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Result", PinType::Float);
 	s_Nodes.back().setExec([node_id]() -> void
 		{
-			float result = py::IchimokuCloud(get_string_input(node_id, 1), get_string_input(node_id, 2), get_string_input(node_id, 3));
+			const char * stock = get_string_input(node_id, 1);
+			const char * start_date = get_string_input(node_id, 2); if (!start_date) start_date = "2019-01-01";
+			const char * end_date = get_string_input(node_id, 3);	if (!end_date) end_date = "2021-01-01";
+
+			float result = py::IchimokuCloud(stock, start_date, end_date);
 			if (verbose)
 				std::cout << "IchimokuCloud " << result << std::endl;
 			set_float_output(node_id, 1, result);
@@ -414,10 +438,16 @@ static Node* SpawnOBV()
 	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Stock Name", PinType::String);
 	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Start Date", PinType::String);
 	s_Nodes.back().Inputs.emplace_back(GetNextId(), "End Date", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "days", PinType::Float);
 	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Result", PinType::Float);
 	s_Nodes.back().setExec([node_id]() -> void
 		{
-			float result = py::OBV(get_string_input(node_id, 1), get_string_input(node_id, 2), get_string_input(node_id, 3));
+			const char * stock = get_string_input(node_id, 1);
+			const char * start_date = get_string_input(node_id, 2); if (!start_date) start_date = "2020-01-01";
+			const char * end_date = get_string_input(node_id, 3);	if (!end_date) end_date = "2021-01-01";
+			float days = get_float_input(node_id, 4);	if (days == std::numeric_limits<float>::infinity()) days = 14.0f;
+
+			float result = py::OBV(stock, start_date, end_date, static_cast<int>(days));
 			if (verbose)
 				std::cout << "OBV " << result << std::endl;
 			set_float_output(node_id, 1, result);
@@ -437,10 +467,15 @@ static Node* SpawnWILLIAMS()
 	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Stock Name", PinType::String);
 	s_Nodes.back().Inputs.emplace_back(GetNextId(), "Start Date", PinType::String);
 	s_Nodes.back().Inputs.emplace_back(GetNextId(), "End Date", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "days", PinType::Float);
 	s_Nodes.back().Outputs.emplace_back(GetNextId(), "Result", PinType::Float);
 	s_Nodes.back().setExec([node_id]() -> void
 		{
-			float result = py::WILLIAMS(get_string_input(node_id, 1), get_string_input(node_id, 2), get_string_input(node_id, 3));
+			const char * stock = get_string_input(node_id, 1);
+			const char * start_date = get_string_input(node_id, 2); if (!start_date) start_date = "2020-01-01";
+			const char * end_date = get_string_input(node_id, 3);	if (!end_date) end_date = "2021-01-01";
+			float days = get_float_input(node_id, 4);	if (days == std::numeric_limits<float>::infinity()) days = 14.0f;
+			float result = py::WILLIAMS(stock, start_date, end_date, static_cast<int>(days));
 			if (verbose)
 				std::cout << "WILLIAMS " << result << std::endl;
 			set_float_output(node_id, 1, result);

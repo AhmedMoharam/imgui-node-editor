@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <functional>
+#include <limits>
 using namespace ax;
 namespace ed = ax::NodeEditor;
 
@@ -308,7 +309,7 @@ const char * get_string_input(ed::NodeId id, int input_pin_index)
 		else
 		{
 			// not connected to any node
-			throw;
+			return nullptr;
 		}		
 	}
 	return nullptr;
@@ -345,7 +346,7 @@ float get_float_input(ed::NodeId id, int input_pin_index)
 		else
 		{
 			// not connected to any node
-			throw;
+			return std::numeric_limits<float>::infinity();
 		}
 	}
 	else {
