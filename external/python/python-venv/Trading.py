@@ -2,11 +2,42 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 
+from backtesting import Backtest, Strategy
+from backtesting.lib import crossover
+from backtesting.test import SMA, GOOG
+from selenium import webdriver
+import pathlib
+import os
+
+
+class SmaCross(Strategy):
+    def init(self):
+        price = self.data.Close
+        self.ma1 = self.I(SMA, price, 10)
+        self.ma2 = self.I(SMA, price, 20)
+
+    def next(self):
+        if crossover(self.ma1, self.ma2):
+            self.buy()
+        elif crossover(self.ma2, self.ma1):
+            self.sell()
+
 
 def histDataDataframe(ticker, period="2y", interval='1d'):
     sym = yf.Ticker(ticker)
     sym_data = sym.history(period=period, interval=interval, actions=False)
     return sym_data
+
+def generate_png(html_path):
+    url = pathlib.Path(os.path.abspath(html_path)).as_uri()
+    png_path = html_path.replace('.html', '.png')
+    options = webdriver.ChromeOptions()
+    options.add_argument('headless')
+    options.add_argument('window-size=1920x1080')
+    driver = webdriver.Chrome("./chromedriver.exe", options=options)
+    driver.get(url)
+    driver.find_element_by_tag_name('body').screenshot(png_path)
+    driver.quit()
 
 class TradingClass:
     def RSI(self, ticker, n=20):
@@ -106,7 +137,6 @@ class TradingClass:
 
         # Drop NA values from Dataframe
         df.dropna(inplace=True)
-		#print(df[::-1]["base_line"][0])
         return float(df[::-1]["base_line"][0])
 
     def WILLIAMS(self, stock, start='2020-01-01', end='2021-01-01', days=14):
@@ -119,3 +149,12 @@ class TradingClass:
         #print(wr[::-1][0])
 
         return float(wr[::-1][0])
+
+    def backtest(self, commission=.002):
+        html_path = "backtesting.html" #dont change this line
+        bt = Backtest(GOOG, SmaCross, commission=commission, exclusive_orders=True)
+        stats = bt.run()
+        bt.plot(filename=html_path)
+        generate_png(html_path)
+        return str(stats)
+

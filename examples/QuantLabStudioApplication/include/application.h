@@ -17,4 +17,5 @@ namespace py {
 	float MACD(const char *stock, const char *start_date, const char *end_date, const char *price_name, int period1, int period2, int period3);
 	float IchimokuCloud(const char *stock, const char *start_date, const char *end_date);
 	float WILLIAMS(const char *stock, const char *start_date, const char *end_date, int days);
+	char const * backtesting(float commission);
 }

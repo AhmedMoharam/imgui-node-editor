@@ -20,21 +20,17 @@ set (_Py_DLLS
 	"${_Py_Dir}/lib/boost_python37-vc141-mt-gd-x64-1_76.dll"
 	"${_Py_Dir}/lib/boost_python37-vc141-mt-x64-1_76.dll" 
 	)
+set (imgui_ini "${CMAKE_CURRENT_SOURCE_DIR}/imgui.ini")
+set (chromedriver  "${CMAKE_CURRENT_SOURCE_DIR}/chromedriver.exe" )
+set (installs ${imgui_ini} ${chromedriver} ${_Py_DLLS})
 	
-foreach(_dll ${_Py_DLLS})
+foreach(element ${installs})
 add_custom_command( 
 		TARGET QuantLabStudio
 		POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E 
-		copy_if_different  ${_dll} $<TARGET_FILE_DIR:QuantLabStudio>
+		copy_if_different  ${element} $<TARGET_FILE_DIR:QuantLabStudio>
 	)
 endforeach()
 
-set (imgui_ini "${CMAKE_CURRENT_SOURCE_DIR}/imgui.ini")
-add_custom_command(
-		TARGET QuantLabStudio
-		POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E 
-		copy_if_different  ${imgui_ini} $<TARGET_FILE_DIR:QuantLabStudio>
-	)
 

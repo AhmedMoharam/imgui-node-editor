@@ -486,6 +486,27 @@ static Node* SpawnWILLIAMS()
 	return &s_Nodes.back();
 }
 
+static Node* SpawnBacktesting()
+{
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "Backtesting", ImColor(255, 128, 128));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "commission", PinType::Float);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			float commission = get_float_input(node_id, 1);	if (commission == std::numeric_limits<float>::infinity()) commission = 0.002f;
+			char const * result = py::backtesting(commission);
+			s_BackTestingImage = Application_LoadTexture("backtesting.png");
+			s_BackTestingResult.appendf("%s", result);
+			if (verbose)
+				std::cout << "Backtesting " << std::endl;
+		});
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
 // -------------------------------------------------------------------------------------------------------------------------------------
 
 static Node* SpawnInputActionNode()

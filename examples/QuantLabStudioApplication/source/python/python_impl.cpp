@@ -12,6 +12,7 @@ public:
 	float MACD(const char *stock, const char *start_date, const char *end_date,const char *price_name,int period1, int period2, int period3);
 	float IchimokuCloud(const char *stock, const char *start_date, const char *end_date);
 	float WILLIAMS(const char *stock, const char *start_date, const char *end_date, int days);
+	char const * backtesting(float commission);
 	virtual ~Py_Trading();
 private:
 	void init();
@@ -74,7 +75,7 @@ float Py_Trading::RSI(const char *stock,int days)
 	{
 
 		boost::python::object value = Trading_object.attr("RSI")(stock, days);
-		return boost::python::extract<float>(value);;
+		return boost::python::extract<float>(value);
 	}
 	catch (const boost::python::error_already_set&)
 	{
@@ -91,7 +92,7 @@ float Py_Trading::OBV(const char *stock, const char *start_date, const char *end
 	try
 	{
 		boost::python::object value = Trading_object.attr("OBV")(stock, start_date, end_date, days);
-		return boost::python::extract<float>(value);;
+		return boost::python::extract<float>(value);
 	}
 	catch (const boost::python::error_already_set&)
 	{
@@ -106,10 +107,8 @@ float Py_Trading::MACD(const char *stock, const char *start_date, const char *en
 	wait_init_done();
 	try
 	{
-		//2020-01-01
-		//2021-01-01
 		boost::python::object value = Trading_object.attr("MACD")(stock, start_date, end_date, price_name, period1, period2, period3);
-		return boost::python::extract<float>(value);;
+		return boost::python::extract<float>(value);
 	}
 	catch (const boost::python::error_already_set&)
 	{
@@ -125,7 +124,7 @@ float Py_Trading::IchimokuCloud(const char *stock, const char *start_date, const
 	try
 	{
 		boost::python::object value = Trading_object.attr("IchimokuCloud")(stock, start_date, end_date);
-		return boost::python::extract<float>(value);;
+		return boost::python::extract<float>(value);
 	}
 	catch (const boost::python::error_already_set&)
 	{
@@ -141,13 +140,29 @@ float Py_Trading::WILLIAMS(const char *stock, const char *start_date, const char
 	try
 	{
 		boost::python::object value = Trading_object.attr("WILLIAMS")(stock, start_date, end_date, days);
-		return boost::python::extract<float>(value);;
+		return boost::python::extract<float>(value);
 	}
 	catch (const boost::python::error_already_set&)
 	{
 		std::cerr << "Error! Python Failed" << std::endl;
 		PyErr_Print();
 		return 0.0f;
+	}
+}
+
+char const * Py_Trading::backtesting(float commission)
+{
+	wait_init_done();
+	try
+	{
+		boost::python::object value = Trading_object.attr("backtest")(commission);
+		return boost::python::extract<char const* >(value);
+	}
+	catch (const boost::python::error_already_set&)
+	{
+		std::cerr << "Error! Python Failed" << std::endl;
+		PyErr_Print();
+		return nullptr;
 	}
 }
 
@@ -177,6 +192,11 @@ float py::IchimokuCloud(const char *stock, const char *start_date, const char *e
 float py::WILLIAMS(const char *stock, const char *start_date, const char *end_date, int days)
 {
 	return obj.WILLIAMS(stock, start_date, end_date, days);
+}
+
+char const * py::backtesting(float commission)
+{
+	return obj.backtesting(commission);
 }
 
 

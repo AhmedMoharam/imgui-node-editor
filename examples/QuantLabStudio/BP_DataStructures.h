@@ -131,6 +131,8 @@ static ImTextureID          s_HeaderBackground = nullptr;
 //static ImTextureID          s_SampleImage = nullptr;
 static ImTextureID          s_SaveIcon = nullptr;
 static ImTextureID          s_RestoreIcon = nullptr;
+static ImTextureID          s_BackTestingImage = nullptr;
+static ImGuiTextBuffer		s_BackTestingResult;
 
 
 static const float          s_TouchTime = 1.0f;

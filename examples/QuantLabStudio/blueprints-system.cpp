@@ -414,6 +414,7 @@ void Application_Finalize()
     releaseTexture(s_RestoreIcon);
     releaseTexture(s_SaveIcon);
     releaseTexture(s_HeaderBackground);
+	releaseTexture(s_BackTestingImage);
 
     if (m_Editor)
     {
@@ -876,7 +877,7 @@ void NodeEditorViewport() {
 						else if (output.Type == PinType::Float)
 						{
 							output.sting_data = buffer;
-							output.float_data = ::atof(buffer);
+							output.float_data = static_cast<float>(::atof(buffer));
 						}
 					}
 					ImGui::PopItemWidth();
@@ -1436,6 +1437,8 @@ void NodeEditorViewport() {
 			node = SpawnWILLIAMS();
 		if (ImGui::MenuItem("IchimokuCloud"))
 			node = SpawnIchimokuCloud();
+		if (ImGui::MenuItem("Backtesting"))
+			node = SpawnBacktesting();
 		ImGui::Separator();
 		if (ImGui::MenuItem("Exec"))
 			node = SpawnExec();
@@ -1609,6 +1612,32 @@ void library_pane() {
 	ImGui::End();
 }
 
+static void ShowBackTestingText()
+{
+	ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver| ImGuiWindowFlags_NoMove);
+	if (!ImGui::Begin("BackTestingResult"))
+	{
+		ImGui::End();
+		return;
+	}
+
+	ImGui::BeginChild("Log");
+	ImGui::TextUnformatted(s_BackTestingResult.begin(), s_BackTestingResult.end());
+	ImGui::EndChild();
+	ImGui::End();
+}
+
+void BackTestingViewport()
+{
+	if (s_BackTestingImage)
+	{
+		ImGui::Begin("BackTesting", 0, ImGuiWindowFlags_NoMove);
+		ImGui::Image(s_BackTestingImage, ImVec2(static_cast<float>(Application_GetTextureWidth(s_BackTestingImage)), static_cast<float>(Application_GetTextureHeight(s_BackTestingImage))));
+		ImGui::End();
+		ShowBackTestingText();
+	}
+}
+
 void Application_Frame()
 {
 	
@@ -1617,5 +1646,7 @@ void Application_Frame()
     auto& io = ImGui::GetIO();
 	library_pane();
 	NodeEditorViewport();
+	BackTestingViewport();
+	//ImGui::ShowDemoWindow();
 }
 
