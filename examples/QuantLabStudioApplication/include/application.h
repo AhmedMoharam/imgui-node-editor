@@ -17,5 +17,6 @@ namespace py {
 	float MACD(const char *stock, const char *start_date, const char *end_date, const char *price_name, int period1, int period2, int period3);
 	float IchimokuCloud(const char *stock, const char *start_date, const char *end_date);
 	float WILLIAMS(const char *stock, const char *start_date, const char *end_date, int days);
-	char const * backtesting(float commission);
+	char const * backtesting(const char * stockName, const char * algoName, float buyValue, float sellValue, const char * startDate, const char * endDate, float commission);
+	char const * IBKR(const char *ip, int port, int clientid,const char * tick,const char * action,int quantity,const char * orderType,float tradePrice,float stoploss,float profitTarget);
 }

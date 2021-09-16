@@ -835,6 +835,11 @@ void NodeEditorViewport() {
 					ImGui::Button(std::to_string(input.float_data).c_str());
 					ImGui::Spring(0);
 				}
+				if (input.Node->Name == "Print" && input.Type == PinType::String)
+				{
+					ImGui::Button(input.sting_data.c_str());
+					ImGui::Spring(0);
+				}
 				ImGui::PopStyleVar();
 				builder.EndInput();
 			}
@@ -1439,6 +1444,8 @@ void NodeEditorViewport() {
 			node = SpawnIchimokuCloud();
 		if (ImGui::MenuItem("Backtesting"))
 			node = SpawnBacktesting();
+		if (ImGui::MenuItem("IBKR"))
+			node = SpawnIBKR();
 		ImGui::Separator();
 		if (ImGui::MenuItem("Exec"))
 			node = SpawnExec();

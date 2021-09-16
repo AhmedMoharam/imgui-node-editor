@@ -12,7 +12,8 @@ public:
 	float MACD(const char *stock, const char *start_date, const char *end_date,const char *price_name,int period1, int period2, int period3);
 	float IchimokuCloud(const char *stock, const char *start_date, const char *end_date);
 	float WILLIAMS(const char *stock, const char *start_date, const char *end_date, int days);
-	char const * backtesting(float commission);
+	char const * backtesting(const char * stockName, const char * algoName, float buyValue, float sellValue, const char * startDate, const char * endDate, float commission);
+	char const * IBKR(const char *ip, int port, int clientid, const char * tick, const char * action, int quantity, const char * orderType, float tradePrice, float stoploss, float profitTarget);
 	virtual ~Py_Trading();
 private:
 	void init();
@@ -150,12 +151,12 @@ float Py_Trading::WILLIAMS(const char *stock, const char *start_date, const char
 	}
 }
 
-char const * Py_Trading::backtesting(float commission)
+char const * Py_Trading::backtesting(const char * stockName, const char * algoName, float buyValue, float sellValue, const char * startDate, const char * endDate, float commission)
 {
 	wait_init_done();
 	try
 	{
-		boost::python::object value = Trading_object.attr("backtest")(commission);
+		boost::python::object value = Trading_object.attr("backtest")(stockName, algoName, buyValue, sellValue, startDate, endDate, commission);
 		return boost::python::extract<char const* >(value);
 	}
 	catch (const boost::python::error_already_set&)
@@ -165,6 +166,23 @@ char const * Py_Trading::backtesting(float commission)
 		return nullptr;
 	}
 }
+
+char const * Py_Trading::IBKR(const char *ip, int port, int clientid, const char * tick, const char * action, int quantity, const char * orderType, float tradePrice, float stoploss, float profitTarget)
+{
+	wait_init_done();
+	try
+	{
+		boost::python::object value = Trading_object.attr("IBKR")(ip, port, clientid, tick, action, quantity, orderType, tradePrice, stoploss, profitTarget);
+		return boost::python::extract<char const* >(value);
+	}
+	catch (const boost::python::error_already_set&)
+	{
+		std::cerr << "Error! Python Failed" << std::endl;
+		PyErr_Print();
+		return nullptr;
+	}
+}
+
 
 
 static Py_Trading obj;
@@ -194,9 +212,14 @@ float py::WILLIAMS(const char *stock, const char *start_date, const char *end_da
 	return obj.WILLIAMS(stock, start_date, end_date, days);
 }
 
-char const * py::backtesting(float commission)
+char const * py::backtesting(const char * stockName, const char * algoName, float buyValue, float sellValue, const char * startDate, const char * endDate, float commission)
 {
-	return obj.backtesting(commission);
+	return obj.backtesting(stockName, algoName, buyValue, sellValue, startDate, endDate, commission);
+}
+
+char const * py::IBKR(const char *ip, int port, int clientid, const char * tick, const char * action, int quantity, const char * orderType, float tradePrice, float stoploss, float profitTarget)
+{
+	return obj.IBKR(ip, port, clientid, tick, action, quantity, orderType, tradePrice, stoploss, profitTarget);
 }
 
 

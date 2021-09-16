@@ -150,7 +150,7 @@ class TradingClass:
 
         return float(wr[::-1][0])
 
-    def backtest(self, commission=.002):
+    def backtest(self, stockName, algoName="rsi", buyValue=30.0, sellValue=70.0, startDate="2019-01-01", endDate="2021-01-01", commission=0.02):
         html_path = "backtesting.html" #dont change this line
         bt = Backtest(GOOG, SmaCross, commission=commission, exclusive_orders=True)
         stats = bt.run()
@@ -158,3 +158,15 @@ class TradingClass:
         generate_png(html_path)
         return str(stats)
 
+    def IBKR(self, ip, port, clientid, tick, action, quantity, orderType, tradePrice, stoploss, profitTarget):
+        print(ip)
+        print(port)
+        print(clientid)
+        print(tick)
+        print(action)
+        print(quantity)
+        print(orderType)
+        print(tradePrice)
+        print(stoploss)
+        print(profitTarget)
+        return "Order Placed"

@@ -308,6 +308,9 @@ static Node* SpawnPrintString()
 	s_Nodes.back().setExec([node_id]() -> void
 		{
 			const char * result = get_string_input(node_id, 1);
+			Node * node = FindNode(node_id);
+			Pin * pin = &(node->Inputs[1]);
+			pin->sting_data = result;
 			std::cout << "Print String: " << result << std::endl;
 		});
 
@@ -492,15 +495,68 @@ static Node* SpawnBacktesting()
 	s_Nodes.emplace_back(node_id, "Backtesting", ImColor(255, 128, 128));
 	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
 	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "stock", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "algoName", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "buyValue", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "sellValue", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "startDate", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "endDate", PinType::String);
 	s_Nodes.back().Inputs.emplace_back(GetNextId(), "commission", PinType::Float);
 	s_Nodes.back().setExec([node_id]() -> void
 		{
-			float commission = get_float_input(node_id, 1);	if (commission == std::numeric_limits<float>::infinity()) commission = 0.002f;
-			char const * result = py::backtesting(commission);
+			const char * stock = get_string_input(node_id, 1);
+			const char * algoName = get_string_input(node_id, 2); if (!algoName) algoName = "rsi";
+			float buyValue = get_float_input(node_id, 3);	if (buyValue == std::numeric_limits<float>::infinity()) buyValue = 30.0f;
+			float sellValue = get_float_input(node_id, 4);	if (sellValue == std::numeric_limits<float>::infinity()) sellValue = 70.0f;
+			const char * start_date = get_string_input(node_id, 5); if (!start_date) start_date = "2019-01-01";
+			const char * end_date = get_string_input(node_id, 6);	if (!end_date) end_date = "2021-01-01";
+			float commission = get_float_input(node_id, 7);	if (commission == std::numeric_limits<float>::infinity()) commission = 0.02f;
+			char const * result = py::backtesting(stock, algoName, buyValue, sellValue, start_date, end_date, commission);
 			s_BackTestingImage = Application_LoadTexture("backtesting.png");
 			s_BackTestingResult.appendf("%s", result);
 			if (verbose)
 				std::cout << "Backtesting " << std::endl;
+		});
+	BuildNode(&s_Nodes.back());
+
+	return &s_Nodes.back();
+}
+
+
+static Node* SpawnIBKR()
+{
+	int node_id = GetNextId();
+	s_Nodes.emplace_back(node_id, "IBKR", ImColor(255, 128, 128));
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "", PinType::Flow);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "ip", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "port", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "clientid", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "tick", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "action", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "quantity", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "orderType", PinType::String);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "tradePrice", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "stoploss", PinType::Float);
+	s_Nodes.back().Inputs.emplace_back(GetNextId(), "profitTarget", PinType::Float);
+	s_Nodes.back().Outputs.emplace_back(GetNextId(), "result", PinType::String);
+	s_Nodes.back().setExec([node_id]() -> void
+		{
+			const char * ip = get_string_input(node_id, 1);
+			float port = get_float_input(node_id, 2);
+			float clientid = get_float_input(node_id, 3);
+			const char * tick = get_string_input(node_id, 4);
+			const char * action = get_string_input(node_id, 5);
+			float quantity = get_float_input(node_id, 6);
+			const char * orderType = get_string_input(node_id, 7);
+			float tradePrice = get_float_input(node_id, 8);
+			float stoploss = get_float_input(node_id, 9);
+			float profitTarget = get_float_input(node_id, 10);
+			
+			char const * result = py::IBKR(ip, static_cast<int>(port), static_cast<int>(clientid), tick, action, static_cast<int>(quantity), orderType, tradePrice, stoploss, profitTarget);
+			set_string_output(node_id, 1, result);
+			if (verbose)
+				std::cout << "IBKR " << std::endl;
 		});
 	BuildNode(&s_Nodes.back());
 

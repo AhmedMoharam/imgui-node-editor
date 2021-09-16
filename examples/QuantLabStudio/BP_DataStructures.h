@@ -305,7 +305,11 @@ const char * get_string_input(ed::NodeId id, int input_pin_index)
 			}
 			else
 			{
-				return evaluate_node_and_get_string(node->ID, connected_pin->ID);
+				const char * result = evaluate_node_and_get_string(node->ID, connected_pin->ID);
+				if (result != nullptr)
+					return result;
+				else 
+					return connected_pin->sting_data.c_str();
 			}
 		}
 		else
@@ -418,8 +422,10 @@ void set_bool_output(ed::NodeId id, int output_pin_index, float result)
 
 }
 
-void set_string_output(ed::NodeId id, int output_pin_index, char * result)
+void set_string_output(ed::NodeId id, int output_pin_index,const char * result)
 {
-
+	Node * node = FindNode(id);
+	Pin * pin = &(node->Outputs[output_pin_index]);
+	pin->sting_data = result;
 }
 
